@@ -1,8 +1,10 @@
 import gsap from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
-import { CustomEase } from 'gsap/CustomEase'
 
-gsap.registerPlugin(ScrollTrigger, CustomEase)
-CustomEase.create('expo.custom', 'M0,0 C0.16,1 0.3,1 1,1')
+gsap.registerPlugin(ScrollTrigger)
+
+// ScrollTrigger is driven manually from the Lenis scroll callback, so lag
+// smoothing must be off or the two disagree after a stall.
+gsap.ticker.lagSmoothing(0)
 
 export { gsap, ScrollTrigger }
