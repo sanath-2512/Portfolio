@@ -21,16 +21,16 @@ export default function Experience() {
       if (!stage.current || chapters.length === 0) return
 
       gsap.set(chapters.slice(1), { autoAlpha: 0, y: 28 })
-      gsap.set(dots.slice(1), { opacity: 0.25 })
+      gsap.set(dots.slice(1), { scaleX: 0.25 })
 
       const tl = pinSequence(stage.current, { distance: 3.2 })
 
       chapters.forEach((chapter, index) => {
         if (index === 0) return
         tl.to(chapters[index - 1], { autoAlpha: 0, y: -28, duration: 0.45, ease: 'none' })
-          .to(dots[index - 1], { opacity: 0.25, duration: 0.2, ease: 'none' }, '<')
-          .to(chapter, { autoAlpha: 1, y: 0, duration: 0.55, ease: 'none' }, '<0.2')
-          .to(dots[index], { opacity: 1, duration: 0.2, ease: 'none' }, '<')
+          .to(dots[index - 1], { scaleX: 0.25, duration: 0.2, ease: 'none' }, '<')
+          .to(chapter, { autoAlpha: 1, y: 0, duration: 0.5, ease: 'none' }, '<0.38')
+          .to(dots[index], { scaleX: 1, duration: 0.2, ease: 'none' }, '<')
           .to({}, { duration: 0.35 })
       })
     })
@@ -72,9 +72,9 @@ export default function Experience() {
 
             <ol className="mt-8" aria-hidden="true">
               {CHAPTER_LABELS.map((label) => (
-                <li key={label} className="exp-dot flex items-center gap-4 py-2" style={{ opacity: 1 }}>
-                  <span className="h-px w-8 bg-accent" />
-                  <span className="mono text-fg">{label}</span>
+                <li key={label} className="flex items-center gap-4 py-2">
+                  <span className="exp-dot h-px w-8 origin-left bg-accent" />
+                  <span className="mono text-fg-dim">{label}</span>
                 </li>
               ))}
             </ol>
