@@ -77,6 +77,30 @@ export const sources = {
     label: 'Résumé, Sept 2026',
     detail: 'Education and activities.',
   },
+  eduaiRoutes: {
+    n: 7,
+    label: 'EduAI backend/routes',
+    detail: 'Four route groups, 19 endpoints, JWT middleware on 13 of them.',
+    href: 'https://github.com/sanath-2512/EduAI./tree/main/backend/routes',
+  },
+  viewlyApp: {
+    n: 8,
+    label: 'Viewly src/App.jsx',
+    detail: 'Routes and the localStorage-backed watchlist.',
+    href: 'https://github.com/sanath-2512/Viewly/blob/main/src/App.jsx',
+  },
+  g17: {
+    n: 9,
+    label: 'G17 India Agri Productivity README',
+    detail: 'Dataset scale, the four dashboards, and team roles.',
+    href: 'https://github.com/r0hansng/SectionA_G17_IndiaAgriProductivity',
+  },
+  g10: {
+    n: 10,
+    label: 'SecA-G10 Retail Sales README',
+    detail: 'Record count and team contributions.',
+    href: 'https://github.com/sanath-2512/SecA-G10',
+  },
 } satisfies Record<string, Source>
 
 export type SourceKey = keyof typeof sources
@@ -395,7 +419,7 @@ export const worthyApply = {
 
 export const agriMind = {
   id: 'agrimind',
-  no: '02',
+  no: '03',
   name: 'AgriMind',
   domain: 'Farm advisory',
   year: 'Mar 2026',
@@ -423,21 +447,189 @@ export const agriMind = {
   trace: ['01 PREDICT', '02 RETRIEVE', '03 REASON', '04 REPORT'],
 }
 
-export const archive = [
-  {
-    id: 'eduai',
-    no: '03',
-    name: 'EduAI',
-    domain: 'Learning platform',
-    year: 'Nov 2025',
-    oneLiner: 'A learning platform that generates explanations and quizzes behind a JWT-authenticated, role-based REST API.',
-    stack: ['React', 'REST APIs', 'JWT', 'AI APIs'],
-    links: {
-      github: 'https://github.com/sanath-2512/EduAI.',
-      demo: 'https://edu-ai-rho-hazel.vercel.app/',
-    } as ProjectLinks,
+export type HttpMethod = 'GET' | 'POST' | 'PUT' | 'DELETE'
+
+export const eduAI = {
+  id: 'eduai',
+  no: '02',
+  name: 'EduAI',
+  domain: 'AI learning platform',
+  year: 'Nov 2025',
+  oneLiner:
+    'A learning platform that turns a topic into a structured course, with quizzes and progress tracking, behind JWT-protected REST APIs.',
+  problem:
+    'Self-learners can find material on any topic, but not a structured path through it: modules in order, practice, and a way to check what stuck.',
+  forWhom: 'Self-directed learners picking up a new topic.',
+  solution:
+    'Type a topic. The backend asks Llama 3.3 70B (through Groq) for the whole course as JSON — modules, lessons, chapter quizzes, a final assessment — checks its shape, stores it, and assembles a quiz from the questions inside it.',
+  challenge:
+    'LLM output that is almost JSON. The call runs in JSON mode; a response that fails to parse, or arrives without modules, falls back to a default course template instead of surfacing an error.',
+  outcome: 'A deployed full-stack app: React + Vite on Vercel, Express 5 + Prisma + MongoDB Atlas on Render.',
+  stack: ['React', 'Vite', 'React Router', 'Node.js', 'Express.js', 'Prisma ORM', 'MongoDB', 'JWT', 'Groq · Llama 3.3 70B'],
+  links: {
+    github: 'https://github.com/sanath-2512/EduAI.',
+    demo: 'https://edu-ai-rho-hazel.vercel.app/',
+  } as ProjectLinks,
+  models: ['User', 'Course', 'Quiz', 'Progress'],
+  /** backend/routes/*.js — `true` means authMiddleware guards the route. */
+  api: [
+    {
+      base: '/api/auth',
+      routes: [
+        ['POST', '/register', false],
+        ['POST', '/login', false],
+        ['GET', '/me', true],
+        ['PUT', '/update-profile', true],
+        ['PUT', '/change-password', true],
+      ],
+    },
+    {
+      base: '/api/courses',
+      routes: [
+        ['POST', '/', true],
+        ['GET', '/', true],
+        ['GET', '/all', false],
+        ['GET', '/:id', false],
+        ['PUT', '/:id', true],
+        ['DELETE', '/:id', true],
+      ],
+    },
+    {
+      base: '/api/quizzes',
+      routes: [
+        ['POST', '/', true],
+        ['GET', '/', true],
+        ['GET', '/course/:courseId', false],
+        ['GET', '/:id', false],
+        ['DELETE', '/:id', true],
+      ],
+    },
+    {
+      base: '/api/progress',
+      routes: [
+        ['POST', '/', true],
+        ['GET', '/', true],
+        ['GET', '/stats', true],
+      ],
+    },
+  ] as Array<{ base: string; routes: Array<[HttpMethod, string, boolean]> }>,
+  /** POST /api/courses with useAI — courseController.createCourse + utils/ai.js. */
+  sequence: [
+    { actor: 'Client', step: 'POST /api/courses { topic, useAI }', note: 'Bearer token from login' },
+    { actor: 'authMiddleware', step: 'jwt.verify → req.user.userId', note: '401 if missing or invalid' },
+    { actor: 'Groq', step: 'llama-3.3-70b-versatile, JSON mode', note: 'max_tokens 8000, temperature 0.5' },
+    { actor: 'ai.js', step: 'JSON.parse + modules check', note: 'falls back to a default course' },
+    { actor: 'Prisma', step: 'course.create → MongoDB', note: 'content stored as JSON' },
+    { actor: 'Prisma', step: 'quiz.create', note: 'chapter + final-assessment questions' },
+    { actor: 'Client', step: '201 Created', note: 'course with its quiz' },
+  ],
+  security: [
+    'Passwords hashed with bcrypt (10 salt rounds).',
+    'JWT signed at login with a 7-day expiry.',
+    'Protected routes on both client (ProtectedRoute) and server (authMiddleware).',
+    'Updates and deletes check the course belongs to the caller, else 401.',
+  ],
+  roleNote:
+    'An earlier résumé said "role-based access control". The code has JWT auth and per-owner checks, but no roles, so this site says only what the code does.',
+}
+
+export const viewly = {
+  id: 'viewly',
+  no: '04',
+  name: 'Viewly',
+  domain: 'Movie discovery',
+  year: 'Jul 2025',
+  oneLiner:
+    'A movie discovery app on the TMDB API: trending and top-rated lists, search, official trailers, and a watchlist that survives a reload.',
+  problem: 'Finding something to watch means hopping between lists, search results and trailers on different sites.',
+  solution:
+    'One React app: four TMDB lists on the home page, title search, a detail page with the official trailer, and a watchlist kept in localStorage.',
+  challenge:
+    'State and persistence without a backend. The watchlist lives in React state and is mirrored to localStorage on every change, so it is there after a reload.',
+  outcome:
+    'Deployed on Netlify with an SPA redirect rule, so deep links such as /movie/:id resolve. Built to practise real-world API integration and state management.',
+  stack: ['React', 'Vite', 'React Router', 'TMDB API', 'YouTube embeds', 'localStorage', 'Netlify'],
+  links: {
+    github: 'https://github.com/sanath-2512/Viewly',
+    demo: todo('Viewly Netlify URL'),
+  } as ProjectLinks,
+  /** src/App.jsx routes and the TMDB endpoints each view calls. */
+  routes: [
+    { path: '/', view: 'Home', data: 'trending/movie/day · movie/popular · movie/top_rated · movie/now_playing' },
+    { path: '/search', view: 'Search', data: 'search/movie?query=' },
+    { path: '/movie/:id', view: 'Details', data: 'movie/{id} · movie/{id}/videos' },
+    { path: '/movie/:id/:key', view: 'Trailer', data: 'youtube.com/embed/{key}' },
+    { path: '/watchlist', view: 'Watchlist', data: 'localStorage["watchlist"]' },
+    { path: '/about', view: 'About', data: 'static' },
+  ],
+}
+
+export const dva = {
+  id: 'dva',
+  no: '05',
+  name: 'DVA Portfolio',
+  domain: 'Data visualisation',
+  year: '2026',
+  oneLiner:
+    'My Data Visualization & Analytics coursework: two team dashboards, and a React site that presents them.',
+  context: 'Data Visualization & Analytics (DVA), Newton School of Technology — Section A group projects.',
+  site: {
+    stack: ['React', 'Vite', 'Tailwind CSS', 'Framer Motion'],
+    github: 'https://github.com/sanath-2512/Dva-Portofolio',
+    demo: todo('DVA portfolio live URL') as Maybe<string>,
   },
-]
+  dashboards: [
+    {
+      id: 'crop',
+      title: 'India Agricultural Productivity Intelligence',
+      tool: 'Tableau',
+      team: 'Group G-17 · 6 members',
+      role: 'PPT & Quality Lead',
+      mine: 'Built Dashboard 4, Crop Portfolio: the production-share treemap, the state yield ranking, and the fastest-growing crop by CAGR. Also the presentation deck and the quality review.',
+      question:
+        'Which states, districts and crops underperform on yield, and how did productivity move from 1997 to 2019?',
+      scale: [
+        { value: '345,336', label: 'rows × 8 columns' },
+        { value: '1997–2019', label: '23 years' },
+        { value: '707', label: 'districts' },
+        { value: '37', label: 'states & UTs' },
+      ],
+      views: ['Executive Summary', 'Underperformance Analysis', 'Productivity Trends', 'Crop Portfolio'],
+      image: 'dva-crop-portfolio',
+      imageSize: [2122, 1568] as [number, number],
+      /** Regions of the Crop Portfolio screenshot, as % of the image. */
+      regions: [
+        { label: 'Fastest-growing crop (CAGR)', tag: 'METRIC', x: 3, y: 9.8, w: 24.8, h: 16.4 },
+        { label: 'Top yield state', tag: 'METRIC', x: 28.7, y: 9.8, w: 26, h: 16.4 },
+        { label: 'Production-share treemap', tag: 'CHART', x: 3.6, y: 35, w: 46.3, h: 60 },
+        { label: 'State yield rank (T/Ha)', tag: 'CHART', x: 51.4, y: 29.7, w: 42.5, h: 65.3 },
+      ],
+      live: 'https://public.tableau.com/app/profile/pushpendra.parihar/viz/Group17_SectionA_Dashboard_Final/1ExecutiveSummary',
+      repo: 'https://github.com/r0hansng/SectionA_G17_IndiaAgriProductivity',
+      source: 'g17' as SourceKey,
+    },
+    {
+      id: 'retail',
+      title: 'Retail Performance Intelligence',
+      tool: 'Google Sheets',
+      team: 'Group G10 · 6 members',
+      role: 'Pivot calculations',
+      mine: 'Pivot calculations behind the sales and outlet views.',
+      question: 'Where do Big Mart sales concentrate, by item type, outlet type and location tier?',
+      scale: [{ value: '8,522', label: 'sales records' }],
+      views: ['Sales by item type', 'Sales by outlet type', 'Revenue by location tier', 'Revenue by fat content'],
+      image: 'dva-retail',
+      imageSize: [2022, 1832] as [number, number],
+      regions: [],
+      live: null,
+      repo: 'https://github.com/sanath-2512/SecA-G10',
+      source: 'g10' as SourceKey,
+    },
+  ],
+}
+
+/** Work order, as listed in the index. */
+export const projectOrder = [worthyApply, eduAI, agriMind, viewly, dva] as const
 
 /* ------------------------------------------------------------------ */
 /* §05 How I build                                                    */
@@ -478,6 +670,16 @@ export const processTabs: Array<{ id: string; label: string; steps: Partial<Reco
     },
   },
   {
+    id: 'eduai',
+    label: 'EduAI',
+    steps: {
+      Problem: 'A topic, but no structured path through it.',
+      Architecture: 'React SPA → Express REST API → Groq in JSON mode → Prisma on MongoDB.',
+      Implementation: 'bcrypt + JWT auth, per-owner checks, a default-course fallback for malformed output.',
+      Deployment: 'React on Vercel, Express on Render.',
+    },
+  },
+  {
     id: 'fusion',
     label: 'Fusion Cards',
     steps: {
@@ -493,8 +695,8 @@ export const processTabs: Array<{ id: string; label: string; steps: Partial<Reco
 /* §06 Stack                                                          */
 /* ------------------------------------------------------------------ */
 
-export type ProjectTag = 'WorthyApply' | 'AgriMind' | 'Fusion Cards' | 'This site'
-export const projectTags: ProjectTag[] = ['WorthyApply', 'AgriMind', 'Fusion Cards', 'This site']
+export type ProjectTag = 'WorthyApply' | 'EduAI' | 'AgriMind' | 'Viewly' | 'DVA' | 'Fusion Cards' | 'This site'
+export const projectTags: ProjectTag[] = ['WorthyApply', 'EduAI', 'AgriMind', 'Viewly', 'DVA', 'Fusion Cards', 'This site']
 
 export interface Tool {
   name: string
@@ -502,7 +704,10 @@ export interface Tool {
   projects: ProjectTag[]
 }
 
-/** Appendix A categories. Tools with no project go under "also worked with". */
+/**
+ * Résumé categories. A tool links to a project only where that project's
+ * repo (or the résumé) shows it; the rest go under "also worked with".
+ */
 export const stack: Array<{ id: string; label: string; tools: Tool[] }> = [
   {
     id: 'languages',
@@ -510,8 +715,8 @@ export const stack: Array<{ id: string; label: string; tools: Tool[] }> = [
     tools: [
       { name: 'Python', use: 'Backends, pipelines, the fact-check', projects: ['WorthyApply', 'AgriMind', 'Fusion Cards'] },
       { name: 'TypeScript', use: 'Typed frontends', projects: ['WorthyApply', 'This site'] },
-      { name: 'HTML/CSS', use: 'Tokens, layout, both themes', projects: ['This site'] },
-      { name: 'JavaScript', projects: [] },
+      { name: 'JavaScript', use: 'Express APIs and React apps', projects: ['EduAI', 'Viewly', 'DVA'] },
+      { name: 'HTML/CSS', use: 'Hand-written styles and tokens', projects: ['EduAI', 'Viewly', 'This site'] },
       { name: 'SQL', projects: [] },
     ],
   },
@@ -520,13 +725,13 @@ export const stack: Array<{ id: string; label: string; tools: Tool[] }> = [
     label: 'Backend & APIs',
     tools: [
       { name: 'FastAPI', use: 'Analysis and advisory services', projects: ['WorthyApply', 'AgriMind'] },
-      { name: 'REST APIs', use: 'Analyze, extract and tailor endpoints', projects: ['WorthyApply'] },
+      { name: 'REST APIs', use: 'Designed in two apps, consumed in a third', projects: ['WorthyApply', 'EduAI', 'Viewly'] },
       { name: 'Server-Sent Events', use: 'Streaming progress and tokens', projects: ['WorthyApply'] },
       { name: 'Pydantic', use: 'Typed structured output', projects: ['WorthyApply'] },
       { name: 'Pytest', use: '49 tests', projects: ['WorthyApply'] },
-      { name: 'Node.js', projects: [] },
-      { name: 'Express.js', projects: [] },
-      { name: 'Prisma ORM', projects: [] },
+      { name: 'Node.js', use: 'API runtime', projects: ['EduAI'] },
+      { name: 'Express.js', use: '19-endpoint REST API', projects: ['EduAI'] },
+      { name: 'Prisma ORM', use: 'Four models on MongoDB', projects: ['EduAI'] },
     ],
   },
   {
@@ -535,8 +740,8 @@ export const stack: Array<{ id: string; label: string; tools: Tool[] }> = [
     tools: [
       { name: 'AWS Bedrock', use: 'Model access in document pipelines', projects: ['Fusion Cards'] },
       { name: 'Amazon S3', use: 'Document storage', projects: ['Fusion Cards'] },
-      { name: 'Render', use: 'Python backends', projects: ['WorthyApply', 'AgriMind'] },
-      { name: 'Vercel', use: 'Next.js frontend', projects: ['WorthyApply'] },
+      { name: 'Render', use: 'Python and Node backends', projects: ['WorthyApply', 'AgriMind', 'EduAI'] },
+      { name: 'Vercel', use: 'Frontends', projects: ['WorthyApply', 'AgriMind', 'EduAI'] },
       { name: 'Git & GitHub', projects: [] },
     ],
   },
@@ -546,36 +751,36 @@ export const stack: Array<{ id: string; label: string; tools: Tool[] }> = [
     tools: [
       { name: 'OpenSearch', use: 'Retrieval index', projects: ['Fusion Cards'] },
       { name: 'ChromaDB', use: 'Agronomy knowledge store', projects: ['AgriMind'] },
+      { name: 'MongoDB', use: 'Courses, quizzes, progress', projects: ['EduAI'] },
       { name: 'MySQL', projects: [] },
-      { name: 'MongoDB', projects: [] },
     ],
   },
   {
     id: 'ai',
     label: 'AI / ML',
     tools: [
-      { name: 'LLMs', use: 'Structured analysis, reasoning, answers', projects: ['WorthyApply', 'AgriMind', 'Fusion Cards'] },
+      { name: 'LLMs', use: 'Structured analysis, reasoning, course generation', projects: ['WorthyApply', 'EduAI', 'AgriMind', 'Fusion Cards'] },
       { name: 'RAG', use: 'Retrieval over bank documents and agronomy', projects: ['AgriMind', 'Fusion Cards'] },
       { name: 'LangChain', use: 'Provider adapters under the router', projects: ['WorthyApply'] },
       { name: 'LangGraph', use: 'Multi-step agent state', projects: ['AgriMind'] },
-      { name: 'Prompt Engineering', use: 'Document-pipeline prompts', projects: ['Fusion Cards'] },
-      { name: 'scikit-learn', use: 'Crop-yield model', projects: ['AgriMind'] },
-      { name: 'Vector Embeddings', projects: [] },
+      { name: 'Prompt Engineering', use: 'Structured-output and pipeline prompts', projects: ['WorthyApply', 'EduAI', 'Fusion Cards'] },
+      { name: 'Vector Embeddings', use: 'all-MiniLM-L6-v2 in ChromaDB', projects: ['AgriMind'] },
+      { name: 'Machine Learning', use: 'Crop-yield regression', projects: ['AgriMind'] },
+      { name: 'scikit-learn', use: 'Yield model', projects: ['AgriMind'] },
       { name: 'Hugging Face', projects: [] },
-      { name: 'Machine Learning', projects: [] },
     ],
   },
   {
     id: 'frontend',
     label: 'Frontend',
     tools: [
-      { name: 'React', use: 'Interfaces', projects: ['AgriMind', 'This site'] },
+      { name: 'React', use: 'Every interface here', projects: ['EduAI', 'AgriMind', 'Viewly', 'DVA', 'This site'] },
       { name: 'Next.js', use: 'App frontend', projects: ['WorthyApply'] },
-      { name: 'Tailwind CSS', use: 'Utility layer over the tokens', projects: ['This site'] },
+      { name: 'Tailwind CSS', use: 'Utility layer over tokens', projects: ['DVA', 'This site'] },
       { name: 'Three.js', use: 'The calibration field', projects: ['This site'] },
       { name: 'GSAP', use: 'Scroll choreography', projects: ['This site'] },
       { name: 'Lenis', use: 'Smooth scroll', projects: ['This site'] },
-      { name: 'Vite', use: 'Build', projects: ['This site'] },
+      { name: 'Vite', use: 'Build', projects: ['EduAI', 'Viewly', 'DVA', 'This site'] },
     ],
   },
 ]

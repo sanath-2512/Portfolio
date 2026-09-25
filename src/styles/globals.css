@@ -521,11 +521,13 @@
       transform 0.3s var(--ease-out);
   }
 
-  .detect.is-on .detect-box > i {
+  .detect.is-on .detect-box > i,
+  .detect-host.is-on .detect .detect-box > i {
     transform: scale(1);
   }
 
-  .detect.is-on .detect-tag {
+  .detect.is-on .detect-tag,
+  .detect-host.is-on .detect .detect-tag {
     opacity: 1;
     transform: none;
     transition-delay: 0.12s;

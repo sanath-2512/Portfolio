@@ -1,5 +1,5 @@
 import { useEffect } from 'react'
-import { about, agriMind, contact, experience, processTabs, signals, stack, worthyApply } from '@/data/content'
+import { agriMind, contact, processTabs, signals, stack, worthyApply } from '@/data/content'
 import { initSmoothScroll } from '@/lib/smoothScroll'
 import { refreshOnLayoutSettled } from '@/lib/motion'
 import { startInput } from '@/lib/input'
@@ -10,6 +10,8 @@ import { Cursor } from '@/components/global/Cursor'
 import { Footer } from '@/components/global/Footer'
 import { Grain } from '@/components/global/Grain'
 import Hero from '@/components/sections/Hero'
+import About from '@/components/sections/About'
+import Experience from '@/components/sections/Experience'
 import { Pending } from '@/components/sections/Pending'
 
 export default function App() {
@@ -36,12 +38,8 @@ export default function App() {
 
       <main id="main" tabIndex={-1} className="relative z-10 outline-none">
         <Hero />
-        <Pending id="about" title={about.title}>
-          {about.statement.map((s) => (typeof s === 'string' ? s : s.map((p) => (typeof p === 'string' ? p : p.term)).join(''))).join(' ')}
-        </Pending>
-        <Pending id="experience" title="Field report" field="chunks">
-          {experience.role}, {experience.org} · {experience.period} · {experience.location}
-        </Pending>
+        <About />
+        <Experience />
         <Pending
           id="work"
           title="Work"
