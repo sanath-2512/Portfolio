@@ -28,7 +28,7 @@ body{width:1200px;height:630px;background:#0E110F;color:#ECE6D6;font-family:A;po
 .brand{display:flex;gap:18px;align-items:center}
 h1{position:absolute;left:60px;top:170px;font-size:156px;line-height:.86;font-weight:800;font-variation-settings:'wdth' 125;text-transform:uppercase}
 .line{position:absolute;left:64px;right:64px;bottom:128px;height:1px;background:rgba(236,230,214,.2)}
-p{position:absolute;left:64px;bottom:62px;font-size:34px;font-weight:500}
+p{position:absolute;left:64px;bottom:62px;font-size:36px;font-weight:500}
 p b{color:#FF5A1F;font-weight:500}
 .dim{position:absolute;right:64px;bottom:70px;color:#D7F25C}
 .reg{position:absolute;width:14px;height:14px}.reg:before,.reg:after{content:'';position:absolute;background:#8C9189}
@@ -37,11 +37,11 @@ p b{color:#FF5A1F;font-weight:500}
 <div class="grid"></div>
 <span class="reg" style="left:24px;top:24px"></span><span class="reg" style="right:24px;top:24px"></span>
 <span class="reg" style="left:24px;bottom:24px"></span><span class="reg" style="right:24px;bottom:24px"></span>
-<div class="top"><div class="brand">${marker}<span class="mono" style="color:#ECE6D6">Backend + AI engineer</span></div><span class="mono">RAG · Agents · FastAPI</span></div>
+<div class="top"><div class="brand">${marker}<span class="mono" style="color:#ECE6D6">Backend × Applied AI × Systems</span></div><span class="mono">Grounding · Reliability · Evaluation</span></div>
 <h1>Sanath<br>Waraikar</h1>
 <div class="line"></div>
-<p>I build AI systems that stay <b>grounded</b>.</p>
-<span class="mono dim">18+ banks · 5 providers · 49 tests</span>
+<p>I build <b>systems</b> around models — not just calls to them.</p>
+
 </body></html>`
 
 const browser = await chromium.launch()

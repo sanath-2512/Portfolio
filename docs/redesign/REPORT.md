@@ -185,3 +185,39 @@ See AUDIT §5.
 - **Link previews:** `public/og.png` (1200×630, rendered by `scripts/og/render.mjs` in the site's own fonts), Open Graph and Twitter card tags, a canonical URL and `Person` JSON-LD. The URLs are absolute on Vercel, using `VERCEL_PROJECT_PRODUCTION_URL`.
 - `scripts/qa/sections.mjs` waits for the staged sections before capturing.
 - Re-verified: lint clean; 78 keyboard stops; the no-WebGL fallback; routes; no overflow at 6 widths × 2 themes. Lighthouse: mobile 96, desktop 100; accessibility, best practices and SEO all 100.
+
+## Content revamp — "systems around models"
+
+The site now reads as an engineer's site rather than a résumé. The positioning line is "I build **systems** around models — not just calls to them." Grounding, reliability and evaluation shape the copy without being repeated as slogans. The motion system, field, router, theme and staged mounting are unchanged. `docs/PORTFOLIO_CONTENT.md` holds the new copy.
+
+### Structure
+01 Intro · 02 How I think · 03 Experience ("Where I learned to ship") · 04 Builds ("Things I actually built") · 05 How I build · 06 Toolkit · 07 Outside the code · 08 Contact ("Got a problem worth building?"). Section ids didn't change, so deep links and the field's `data-cal` stops still work.
+
+### Progressive disclosure
+Each project runs in three levels: 1. the story (a kicker headline plus `Story` rows); 2. a scroll-lit `Flow` diagram and key numbers; 3. a `DeepDive` (`src/components/motion/DeepDive.tsx`) holding the technical depth that used to be inline. The deep dive has `aria-expanded` and `aria-controls`, and its height and clip-path expand calls `ScrollTrigger.refresh()` afterwards. No technical content was removed; it was moved.
+
+- **WorthyApply:** "When the model lies" (the real `test_claim_checks` case: flags appear, then each is struck, then the original wording is restored), the provider lanes (illustrative failover), and a 5 / 49 / SSE / Deterministic grid. The horizontal pin is gone; its stages sit in the deep dive.
+- **EduAI:** the "unreliable JSON" story, a "Behind the API" block and a generation flow. The endpoint sheet and the sequence diagram are in the deep dive.
+- **AgriMind:** the prediction vs retrieval questions, and a query anatomy that detects `{yield_category}` as coming from the prediction. The StateGraph pin is gone; the graph and trace are in the deep dive.
+- **Viewly:** "The non-AI project". **DVA:** "Data, before the AI".
+
+### New interactions
+- The Experience cards light the matching stages of the pipeline strip, which is now banded into Document → Retrieval → Reasoning.
+- How I build has six stages, and the Break and Measure stages are coloured. Project tabs use a roving tabindex.
+- The Toolkit is four groups of tool buttons with an inspector that shows where each tool was actually used. The inspector is sticky on desktop and inline on mobile.
+- The "Currently exploring" rows reveal where each area shows up in the work.
+
+### Deviations from the requested copy (factual accuracy)
+- "Across thousands of pieces of real-world content" became "across credit-card documents from 18+ banks". The document count isn't verified.
+- Buildspace was removed from Outside the code, as asked.
+- "What I learned" rows appear only where the copy was supplied (DVA). None were invented.
+- The hero Resume button was removed. Resume stays in the nav and contact, hidden until the PDF exists.
+- Education stays as a small entry under Experience.
+
+### Verification
+- `tsc` and ESLint are clean, and the production build passes.
+- Keyboard walk: 95 stops, all with a visible focus ring.
+- The no-WebGL fallback and the case-study route and back navigation work.
+- No horizontal overflow at 6 widths × 2 themes, and none with reduced motion at 390 px.
+- The number audit passes: every figure on the page matches a cited source.
+- Lighthouse, mobile: 96 / 100 / 100 / 100 (LCP 2.5 s, TBT ~100 ms, CLS 0). Desktop: 100 / 100 / 100 / 100.

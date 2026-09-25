@@ -1,4 +1,4 @@
-import { useLayoutEffect, useRef } from 'react'
+import { Fragment, useLayoutEffect, useRef } from 'react'
 import { experience } from '@/data/content'
 import { gsap } from '@/lib/gsap'
 import { MQ } from '@/lib/motion'
@@ -13,7 +13,7 @@ const { pipeline } = experience
  * travels the line as you scroll and each stage is DETECTed as it passes.
  * The list itself is the text alternative.
  */
-export function ArchitectureStrip() {
+export function ArchitectureStrip({ focus = [] }: { focus?: string[] }) {
   const root = useRef<HTMLDivElement | null>(null)
   const packet = useRef<HTMLSpanElement | null>(null)
 
@@ -53,18 +53,39 @@ export function ArchitectureStrip() {
   }, [])
 
   return (
-    <div ref={root} className="relative mt-20 border-y border-line bg-bg py-10 lg:py-14">
+    <div ref={root} className="relative mt-16 border-y border-line bg-bg py-10 lg:py-14">
       <div className="shell">
         <div className="flex flex-wrap items-baseline justify-between gap-3">
-          <p className="mono text-ink">Retrieval pipeline</p>
+          <p className="text-[clamp(1.3rem,2.4vw,2rem)] font-bold uppercase leading-none" style={{ fontVariationSettings: "'wdth' 120" }}>
+            {pipeline.phases.map((ph, i) => (
+              <Fragment key={ph.id}>
+                {i > 0 ? <span className="text-ink-muted"> → </span> : null}
+                {ph.label}
+              </Fragment>
+            ))}
+          </p>
           <p className="mono text-ink-muted">
             <span className="border border-line-strong px-1.5 py-0.5 text-ink">{pipeline.label}</span>
             <span className="ml-3">System level · no client detail</span>
           </p>
         </div>
+        <p className="mt-3 text-ink-muted">{pipeline.caption}</p>
         {import.meta.env.DEV ? <TodoNote item={pipeline.orderNote} label="Confirm stage order" className="mt-3" /> : null}
 
-        <div className="relative mt-10">
+        {/* phase bands over the stages they group */}
+        <div className="mt-10 hidden grid-cols-9 gap-x-3 lg:grid" aria-hidden="true">
+          {pipeline.phases.map((ph) => (
+            <p
+              key={ph.id}
+              className="mono mono-sm border-t-2 border-ink pt-2 text-ink"
+              style={{ gridColumn: `${ph.from + 1} / ${ph.to + 1}` }}
+            >
+              {ph.label}
+            </p>
+          ))}
+        </div>
+
+        <div className="relative mt-6">
           {/* the line and the packet */}
           <div
             aria-hidden="true"
@@ -81,7 +102,17 @@ export function ArchitectureStrip() {
             aria-label="Fusion Cards retrieval pipeline, simplified, in order"
           >
             {pipeline.stages.map((stage, i) => (
-              <li key={stage.id} className="strip-node detect-host relative pl-8 lg:pl-0 lg:pt-8">
+              <li
+                key={stage.id}
+                className={cx(
+                  'strip-node detect-host relative pl-8 transition-opacity duration-300 lg:pl-0 lg:pt-8',
+                  focus.length > 0 && !focus.includes(stage.id) && 'strip-dim',
+                  focus.includes(stage.id) && 'strip-focus',
+                )}
+              >
+                {pipeline.phases.some((ph) => ph.from === i) ? (
+                  <p className="mono mono-sm mb-2 text-ink lg:hidden">{pipeline.phases.find((ph) => ph.from === i)?.label}</p>
+                ) : null}
                 <span
                   aria-hidden="true"
                   className={cx(

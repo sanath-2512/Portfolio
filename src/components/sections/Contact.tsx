@@ -8,14 +8,14 @@ import { Magnetic } from '@/components/motion/MagneticButton'
 import { StretchText } from '@/components/motion/StretchText'
 import { Known } from '@/components/ui/Todo'
 
-// "Let's build something useful." → LET'S BUILD / SOMETHING USEFUL.
-const words = contact.headline.replace(/\.$/, '').split(' ')
-const lineOne = words.slice(0, 2).join(' ')
-const lineTwo = words.slice(2, -1).join(' ')
-const lastWord = words[words.length - 1]
+// GOT A PROBLEM / WORTH BUILDING? — the last word carries the emphasis.
+const [lineOne, second] = contact.headline
+const lineTwo = second.split(' ').slice(0, -1).join(' ')
+const lastWord = second.split(' ').slice(-1)[0].replace(/\?$/, '')
+const label = contact.headline.join(' ')
 
 /**
- * §08 Calibrated. The field has settled into its grid; the headline enters
+ * §08 Contact. The field has settled into its grid; the question enters
  * ultra-condensed and stretches, with the scroll, until it spans the page.
  */
 export default function Contact() {
@@ -88,7 +88,7 @@ export default function Contact() {
   return (
     <SectionFrame id="contact" className="relative z-10 flex min-h-svh flex-col pb-16 pt-[var(--section-pad)]">
       <div className="shell mt-12 flex flex-1 flex-col justify-between gap-16">
-        <h2 ref={head} id="contact-title" className="wdth font-extrabold uppercase leading-[0.86] tracking-[-0.01em]" aria-label={contact.headline}>
+        <h2 ref={head} id="contact-title" className="wdth font-extrabold uppercase leading-[0.86] tracking-[-0.01em]" aria-label={label}>
           <span className="ct-block block whitespace-nowrap" aria-hidden="true">
             {lineOne}
           </span>
@@ -96,63 +96,66 @@ export default function Contact() {
             {lineTwo}
             <br className="md:hidden" />
             <span className="hidden md:inline"> </span>
-            <span className="text-signal">{lastWord}</span>.
+            <span className="text-signal">{lastWord}</span>?
           </span>
         </h2>
 
-        <div className="grid12 gap-y-10">
-          <div className="col-span-4 md:col-span-12 lg:col-span-8">
-            <p className="mono text-ink-muted">Email</p>
+        <div className="grid12 gap-y-12">
+          <div className="col-span-4 md:col-span-12 lg:col-span-7">
+            <div className="grid max-w-[52ch] gap-3 text-[clamp(1.1rem,1.6vw,1.4rem)] leading-relaxed">
+              <p>{contact.body[0]}</p>
+              <p className="text-ink-muted">{contact.body[1]}</p>
+            </div>
             <a
               href={mailto}
-              className="mt-3 block text-[clamp(1.35rem,3.6vw,3.25rem)] font-semibold leading-[1.05] tracking-[-0.01em] [overflow-wrap:anywhere] hover:text-signal"
+              className="mt-10 block text-[clamp(1.35rem,3.2vw,2.75rem)] font-semibold leading-[1.05] tracking-[-0.01em] [overflow-wrap:anywhere] hover:text-signal"
             >
               {profile.email.split('@')[0]}@
               <wbr />
               {profile.email.split('@')[1]}
             </a>
-            <div className="mt-6 flex flex-wrap items-center gap-x-4 gap-y-3">
+            <button
+              type="button"
+              onClick={copy}
+              className="mono mt-4 inline-flex min-h-[44px] items-center border border-line-strong px-4 text-ink transition-colors duration-300 hover:border-ink"
+            >
+              <span className={copied ? 'text-measure' : undefined}>{copied ? 'Copied ✓' : 'Copy address'}</span>
+            </button>
+            <span className="sr-only" aria-live="polite">
+              {copied ? 'Email address copied to clipboard' : ''}
+            </span>
+          </div>
+
+          <ul className="col-span-4 self-end md:col-span-12 lg:col-span-4 lg:col-start-9">
+            <li className="border-t border-line py-3">
               <Magnetic>
                 <a href={mailto} className="btn btn-primary stretch-host">
-                  <StretchText reserve>Write to me</StretchText>
+                  <StretchText reserve>Email</StretchText>
                   <span aria-hidden="true">→</span>
                 </a>
               </Magnetic>
-              <button
-                type="button"
-                onClick={copy}
-                className="mono inline-flex min-h-[48px] items-center border border-line-strong px-4 text-ink transition-colors duration-300 hover:border-ink"
-              >
-                <span className={copied ? 'text-measure' : undefined}>{copied ? 'Copied ✓' : 'Copy address'}</span>
-              </button>
-              <span className="sr-only" aria-live="polite">
-                {copied ? 'Email address copied to clipboard' : ''}
-              </span>
-            </div>
-          </div>
-
-          <ul className="col-span-4 self-end md:col-span-12 lg:col-span-4">
+            </li>
             {[
-              { label: 'LinkedIn', href: profile.links.linkedin },
               { label: 'GitHub', href: profile.links.github },
+              { label: 'LinkedIn', href: profile.links.linkedin },
             ].map((l) => (
               <li key={l.label} className="border-t border-line">
-                <a href={l.href} target="_blank" rel="noreferrer" className="stretch-host group flex min-h-[52px] items-center justify-between text-[1.15rem]">
+                <a href={l.href} target="_blank" rel="noreferrer" className="stretch-host group flex min-h-[56px] items-center justify-between text-[1.2rem] font-semibold uppercase">
                   <StretchText reserve to={125}>
                     {l.label}
                   </StretchText>
-                  <span aria-hidden="true" className="mono text-ink-muted transition-colors group-hover:text-signal">↗</span>
+                  <span aria-hidden="true" className="mono text-ink-muted transition-colors group-hover:text-ink">→</span>
                 </a>
               </li>
             ))}
             <li className="border-y border-line">
               <Known value={profile.links.resume} label="Résumé PDF" className="my-3">
                 {(href) => (
-                  <a href={href} target="_blank" rel="noreferrer" className="stretch-host group flex min-h-[52px] items-center justify-between text-[1.15rem]">
+                  <a href={href} target="_blank" rel="noreferrer" className="stretch-host group flex min-h-[56px] items-center justify-between text-[1.2rem] font-semibold uppercase">
                     <StretchText reserve to={125}>
-                      Résumé
+                      Resume
                     </StretchText>
-                    <span aria-hidden="true" className="mono text-ink-muted group-hover:text-signal">↗</span>
+                    <span aria-hidden="true" className="mono text-ink-muted group-hover:text-ink">→</span>
                   </a>
                 )}
               </Known>

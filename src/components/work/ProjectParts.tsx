@@ -1,14 +1,18 @@
 import type { ReactNode } from 'react'
-import type { Maybe, ProjectLinks } from '@/data/content'
+import type { Maybe, ProjectLinks, StoryRow } from '@/data/content'
 import { cx } from '@/lib/utils'
 import { Known } from '@/components/ui/Todo'
 import { StretchText } from '@/components/motion/StretchText'
 
-/** Project masthead: number, name, one-liner, and the mono meta line. */
+/**
+ * Project masthead: `01 / WORTHYAPPLY` in mono, the kicker as the headline,
+ * and an optional one-liner. The kicker says what the project is *about*.
+ */
 export function ProjectHead({
   id,
   no,
   name,
+  kicker,
   oneLiner,
   meta,
   className,
@@ -16,20 +20,53 @@ export function ProjectHead({
   id: string
   no: string
   name: string
-  oneLiner: string
+  kicker: string
+  oneLiner?: ReactNode
   meta: string[]
   className?: string
 }) {
   return (
-    <header className={cx('grid12 gap-y-4', className)}>
-      <p className="mono col-span-4 text-ink-muted md:col-span-12">
-        <span className="text-ink">{no}</span> / {meta.join(' · ')}
+    <header className={cx('grid12 gap-y-5', className)}>
+      <p className="mono col-span-4 flex flex-wrap items-baseline gap-x-3 text-ink-muted md:col-span-12">
+        <span className="text-ink">
+          {no} / {name.toUpperCase()}
+        </span>
+        <span aria-hidden="true">·</span>
+        <span>{meta.join(' · ')}</span>
       </p>
-      <h3 id={`${id}-title`} className="col-span-4 text-[clamp(2.75rem,6.4vw,6.25rem)] font-extrabold uppercase leading-[0.9] md:col-span-12 xl:col-span-7" style={{ fontVariationSettings: "'wdth' 118" }}>
-        {name}
+      <h3
+        id={`${id}-title`}
+        className="col-span-4 max-w-[20ch] text-[clamp(2.25rem,5.2vw,5.25rem)] font-extrabold uppercase leading-[0.92] md:col-span-12"
+        style={{ fontVariationSettings: "'wdth' 116" }}
+      >
+        <span className="sr-only">{name}: </span>
+        {kicker}
       </h3>
-      <p className="col-span-4 self-end text-[clamp(1.1rem,1.5vw,1.3rem)] leading-snug md:col-span-8 xl:col-span-5">{oneLiner}</p>
+      {oneLiner ? (
+        <div className="col-span-4 max-w-[52ch] text-[clamp(1.1rem,1.6vw,1.4rem)] leading-snug md:col-span-9 lg:col-span-8">{oneLiner}</div>
+      ) : null}
     </header>
+  )
+}
+
+/**
+ * Level 1: the short story, in a fixed order (what it is, why, the
+ * interesting problem, how it works, what I learned). Rows are optional.
+ */
+export function Story({ rows, className }: { rows: StoryRow[]; className?: string }) {
+  return (
+    <dl className={cx('grid content-start gap-y-8 self-start', className)}>
+      {rows.map((row) => (
+        <div key={row.k} className="grid gap-x-8 gap-y-2 border-t border-line pt-4 md:grid-cols-[180px_minmax(0,1fr)]">
+          <dt className="mono text-ink-muted">{row.k}</dt>
+          <dd className="grid max-w-[60ch] content-start gap-3 text-[clamp(1.05rem,1.35vw,1.2rem)] leading-relaxed">
+            {(Array.isArray(row.v) ? row.v : [row.v]).map((line) => (
+              <p key={line}>{line}</p>
+            ))}
+          </dd>
+        </div>
+      ))}
+    </dl>
   )
 }
 

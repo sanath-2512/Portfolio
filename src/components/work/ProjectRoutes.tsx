@@ -3,6 +3,7 @@ import { viewly as v } from '@/data/content'
 import { useFinePointer } from '@/hooks/useMediaQuery'
 import { Citation } from '@/components/motion/Citation'
 import { ScanReveal } from '@/components/motion/ScanReveal'
+import { DeepDive } from '@/components/motion/DeepDive'
 import { Facts, ProjectHead, ProjectLinksRow, StackLine } from '@/components/work/ProjectParts'
 
 /** A wireframe of what each view lays out — drawn, not screenshotted. */
@@ -116,7 +117,37 @@ export function ProjectRoutes() {
   return (
     <article id="viewly" aria-labelledby="viewly-title" className="relative mt-40 scroll-mt-16">
       <div className="shell">
-        <ProjectHead id="viewly" no={v.no} name={v.name} oneLiner={v.oneLiner} meta={[v.domain, v.year, 'Solo build']} />
+        <ProjectHead
+          id="viewly"
+          no={v.no}
+          name={v.name}
+          kicker={v.kicker}
+          meta={[v.year, 'Solo build']}
+          oneLiner={v.story[0].v as string}
+        />
+
+        <div className="grid12 mt-14 gap-y-10">
+          <div className="col-span-4 md:col-span-7">
+            <p className="text-[clamp(1.5rem,2.8vw,2.5rem)] font-semibold leading-[1.15]">
+              Search. Discover. Watch trailers. Save a watchlist.
+            </p>
+            <div className="mt-8 grid gap-1 text-[clamp(1.05rem,1.4vw,1.25rem)] leading-relaxed">
+              <p className="text-ink-muted">No LLM. No agents. No vector database.</p>
+              <p>Just a clean frontend, API integration, state management and persistence.</p>
+            </div>
+          </div>
+          <ul className="col-span-4 self-end md:col-span-4 md:col-start-9" aria-label="Tech">
+            {v.techLine.map((t) => (
+              <li
+                key={t}
+                className="border-t border-line py-2 font-semibold uppercase last:border-b"
+                style={{ fontVariationSettings: "'wdth' 112" }}
+              >
+                {t}
+              </li>
+            ))}
+          </ul>
+        </div>
         <p className="mono mt-10 flex flex-wrap items-center gap-3 text-ink-muted">
           <span>
             Routes · <span className="text-ink">{v.routes.length}</span>
@@ -136,7 +167,10 @@ export function ProjectRoutes() {
           className="flex snap-x snap-mandatory gap-3 overflow-x-auto overscroll-x-contain pb-4 pl-[var(--gutter)] pr-[calc(var(--gutter)+var(--ruler-w))] select-none [scrollbar-width:thin]"
         >
           {v.routes.map((r, i) => (
-            <div key={r.path} className="flex w-[280px] shrink-0 snap-start flex-col border border-line bg-bg p-4 md:w-[320px]">
+            <div
+              key={r.path}
+              className="flex w-[280px] shrink-0 snap-start flex-col border border-line bg-bg p-4 md:w-[320px]"
+            >
               <p className="mono mono-sm text-ink-muted">{String(i + 1).padStart(2, '0')}</p>
               <p className="mono mt-2 text-[15px] normal-case tracking-normal text-ink">{r.path}</p>
               <p className="mt-1 text-[1.35rem] font-bold uppercase" style={{ fontVariationSettings: "'wdth' 112" }}>
@@ -153,30 +187,32 @@ export function ProjectRoutes() {
       </ScanReveal>
 
       <div className="shell mt-12">
-        <div className="grid12 gap-y-10">
-          <Facts
-            className="col-span-4 md:col-span-12 lg:col-span-8"
-            items={[
-              { k: 'Problem', v: v.problem },
-              { k: 'Solution', v: v.solution },
-              { k: 'Hard part', v: v.challenge },
-              { k: 'Outcome', v: v.outcome },
-            ]}
-          />
-          <div className="col-span-4 md:col-span-12 lg:col-span-4">
-            <p className="mono text-ink-muted">Persistence · src/App.jsx</p>
-            <pre className="mono mt-3 overflow-x-auto border border-line bg-bg p-4 text-[11px] normal-case leading-relaxed tracking-normal text-ink">
-              <code>{`useEffect(() => {
+        <DeepDive summary="What each screen loads · persistence · deployment">
+          <div className="grid12 gap-y-10">
+            <Facts
+              className="col-span-4 md:col-span-12 lg:col-span-8"
+              items={[
+                { k: 'Problem', v: v.problem },
+                { k: 'How it works', v: v.solution },
+                { k: 'Hard part', v: v.challenge },
+                { k: 'Outcome', v: v.outcome },
+              ]}
+            />
+            <div className="col-span-4 md:col-span-12 lg:col-span-4">
+              <p className="mono text-ink-muted">Persistence · src/App.jsx</p>
+              <pre className="mono mt-3 overflow-x-auto border border-line bg-bg p-4 text-[11px] normal-case leading-relaxed tracking-normal text-ink">
+                <code>{`useEffect(() => {
   localStorage.setItem(
     "watchlist",
     JSON.stringify(watchlist)
   );
 }, [watchlist]);`}</code>
-            </pre>
-            <StackLine className="mt-6" items={v.stack} />
-            <ProjectLinksRow className="mt-4" links={v.links} />
+              </pre>
+              <StackLine className="mt-6" items={v.stack} />
+              <ProjectLinksRow className="mt-4" links={v.links} />
+            </div>
           </div>
-        </div>
+        </DeepDive>
       </div>
     </article>
   )

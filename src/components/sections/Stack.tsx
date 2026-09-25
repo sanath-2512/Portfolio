@@ -1,5 +1,5 @@
-import { useId, useLayoutEffect, useRef, useState } from 'react'
-import { projectTags, stack, type ProjectTag } from '@/data/content'
+import { useLayoutEffect, useRef, useState } from 'react'
+import { projectTags, toolkit, toolkitAlso, type ProjectTag, type Tool } from '@/data/content'
 import { gsap, ScrollTrigger } from '@/lib/gsap'
 import { DUR, EASE } from '@/lib/motion'
 import { useDesktop } from '@/hooks/useMediaQuery'
@@ -7,31 +7,64 @@ import { cx, prefersReducedMotion } from '@/lib/utils'
 import { SectionFrame } from '@/components/global/SectionFrame'
 import { StretchHeading } from '@/components/motion/StretchHeading'
 
+/** Where a tool was actually used: the answer to "why is this on the list?" */
+function Inspector({ tool, filter }: { tool: Tool; filter: ProjectTag | null }) {
+  return (
+    <div className="detect is-on relative block border border-line bg-bg p-5 lg:p-6" aria-live="polite">
+      <span className="detect-box" aria-hidden="true" style={{ inset: -1 }}>
+        <i />
+        <i />
+        <i />
+        <i />
+      </span>
+      <p className="text-[clamp(1.6rem,2.6vw,2.4rem)] font-extrabold uppercase leading-none" style={{ fontVariationSettings: "'wdth' 120" }}>
+        {tool.name}
+      </p>
+      <p className="mt-3 text-[16px] leading-snug">{tool.use}</p>
+      <p className="mono mono-sm mt-5 flex flex-wrap gap-x-3 gap-y-1">
+        {tool.projects.map((p) => (
+          <span key={p} className={filter === p ? 'signal-sm' : 'text-ink'}>
+            {p}
+          </span>
+        ))}
+      </p>
+      <ul className="mt-4 grid gap-1 border-t border-line pt-4">
+        {tool.details.map((d) => (
+          <li key={d} className="mono mono-sm normal-case tracking-[0.02em] text-ink-muted">
+            {d.startsWith('→') ? d : `→ ${d}`}
+          </li>
+        ))}
+      </ul>
+    </div>
+  )
+}
+
 /**
- * §06 Stack as a spec sheet: what each tool was for and which projects used
- * it. No logos, no bars, no stars. A project chip dims everything that
- * project didn't use.
+ * §06 Tools I actually use. Not a logo wall: four groups, each tool a button.
+ * Pointing at, focusing or tapping one shows where it was actually used.
+ * A project chip dims everything that project didn't touch.
  */
 export default function Stack() {
   const [filter, setFilter] = useState<ProjectTag | null>(null)
-  const [open, setOpen] = useState<string>(stack[0].id)
+  const [active, setActive] = useState<string>('Pytest')
   const desktop = useDesktop()
   const root = useRef<HTMLElement | null>(null)
-  const uid = useId()
+  const all = toolkit.flatMap((g) => g.tools)
+  const current = all.find((t) => t.name === active) ?? all[0]
 
-  // Rows register: each hairline measures out, left to right, as its category enters.
+  // Groups register: each hairline measures out as its group enters.
   useLayoutEffect(() => {
     const scope = root.current
     if (!scope || prefersReducedMotion()) return
     const ctx = gsap.context(() => {
-      gsap.utils.toArray<HTMLElement>('.stack-group', scope).forEach((group) => {
-        const rules = group.querySelectorAll('.stack-rule')
-        gsap.set(rules, { scaleX: 0 })
+      gsap.utils.toArray<HTMLElement>('.tk-group', scope).forEach((group) => {
+        const rule = group.querySelector('.tk-rule')
+        gsap.set(rule, { scaleX: 0 })
         ScrollTrigger.create({
           trigger: group,
-          start: 'top 82%',
+          start: 'top 85%',
           once: true,
-          onEnter: () => gsap.to(rules, { scaleX: 1, duration: DUR.in, ease: EASE, stagger: 0.04 }),
+          onEnter: () => gsap.to(rule, { scaleX: 1, duration: DUR.in, ease: EASE }),
         })
       })
     }, scope)
@@ -42,15 +75,15 @@ export default function Stack() {
     <SectionFrame ref={root} id="stack" className="section-pad relative z-10">
       <div className="shell mt-12 lg:mt-16">
         <div className="flex flex-wrap items-end justify-between gap-6">
-          <StretchHeading id="stack-title">
-            Stack, <span style={{ fontVariationSettings: "'wdth' 125" }}>as used</span>
+          <StretchHeading id="stack-title" className="max-w-[14ch]">
+            Tools I <span style={{ fontVariationSettings: "'wdth' 125" }}>actually</span> use
           </StretchHeading>
-          <p className="mono max-w-[46ch] text-ink-muted">
-            From my résumé, mapped to a project only where that project’s code shows it.
+          <p className="max-w-[36ch] text-[clamp(1.05rem,1.4vw,1.2rem)] leading-relaxed text-ink-muted">
+            I don’t collect technologies. I use them when the problem calls for them.
           </p>
         </div>
 
-        <div role="group" aria-label="Filter by project" className="mt-10 flex flex-wrap gap-2">
+        <div role="group" aria-label="Show tools used by a project" className="mt-10 flex flex-wrap gap-2">
           {[null, ...projectTags].map((tag) => {
             const on = filter === tag
             return (
@@ -70,80 +103,71 @@ export default function Stack() {
           })}
         </div>
 
-        <div className="mt-12 grid gap-y-2">
-          {stack.map((group) => {
-            const used = group.tools.filter((t) => t.projects.length > 0)
-            const also = group.tools.filter((t) => t.projects.length === 0)
-            const expanded = desktop || open === group.id
-            const panelId = `${uid}-${group.id}`
-            return (
-              <section key={group.id} className="stack-group grid12 border-t border-line pt-4 lg:pt-6" aria-labelledby={`${panelId}-h`}>
-                <h3 id={`${panelId}-h`} className="col-span-4 md:col-span-12 lg:col-span-3">
-                  {desktop ? (
-                    <span className="mono text-ink">{group.label}</span>
-                  ) : (
-                    <button
-                      type="button"
-                      aria-expanded={expanded}
-                      aria-controls={panelId}
-                      onClick={() => setOpen(expanded ? '' : group.id)}
-                      className="mono flex min-h-[44px] w-full items-center justify-between text-left text-ink"
-                    >
-                      {group.label}
-                      <span aria-hidden="true" className="text-ink-muted">
-                        {expanded ? '−' : '+'} {group.tools.length}
-                      </span>
-                    </button>
-                  )}
-                </h3>
-
-                <div id={panelId} hidden={!expanded} className="col-span-4 pb-6 md:col-span-12 lg:col-span-9">
-                  <ul>
-                    {used.map((tool) => {
+        <div className="mt-12 grid gap-10 lg:grid-cols-[minmax(0,1fr)_minmax(300px,380px)] lg:gap-14">
+          <div className="grid gap-10 md:grid-cols-2">
+            {toolkit.map((group) => {
+              const hasActive = group.tools.some((t) => t.name === current.name)
+              return (
+                <section key={group.id} className="tk-group" aria-labelledby={`tk-${group.id}`}>
+                  <h3 id={`tk-${group.id}`} className="mono text-ink">
+                    {group.label}
+                  </h3>
+                  <span className="tk-rule mt-2 block h-px origin-left bg-line-strong" aria-hidden="true" />
+                  <ul className="mt-3">
+                    {group.tools.map((tool) => {
                       const dim = filter !== null && !tool.projects.includes(filter)
+                      const on = tool.name === current.name
                       return (
-                        <li
-                          key={tool.name}
-                          className={cx(
-                            'stack-row stretch-host detect group relative grid gap-x-6 gap-y-1 py-3 transition-opacity duration-300 md:grid-cols-[minmax(0,1.1fr)_minmax(0,1.3fr)_minmax(0,1.6fr)]',
-                            dim && 'opacity-25',
-                          )}
-                        >
-                          <span className="detect-box" aria-hidden="true">
-                            <i />
-                            <i />
-                            <i />
-                            <i />
-                          </span>
-                          <span className="stack-rule absolute bottom-0 left-0 right-0 h-px origin-left bg-line" aria-hidden="true" />
-                          <span className="stretch text-[clamp(1.2rem,1.8vw,1.55rem)] font-semibold leading-tight" style={{ '--wdth-to': 122 } as React.CSSProperties}>
-                            {tool.name}
-                          </span>
-                          <span className="text-[15px] text-ink-muted md:pt-1">{tool.use}</span>
-                          <span className="mono mono-sm flex flex-wrap gap-x-3 gap-y-1 md:justify-end md:pt-1.5">
-                            {tool.projects.map((p) => (
-                              <span
-                                key={p}
-                                className={cx('stack-tag transition-colors duration-300', filter === p ? 'signal-sm' : 'text-ink-muted')}
-                              >
-                                {p}
-                              </span>
-                            ))}
-                          </span>
+                        <li key={tool.name}>
+                          <button
+                            type="button"
+                            aria-pressed={on}
+                            onClick={() => setActive(tool.name)}
+                            onPointerEnter={(e) => e.pointerType === 'mouse' && setActive(tool.name)}
+                            onFocus={() => setActive(tool.name)}
+                            className={cx(
+                              'stretch-host group flex min-h-[44px] w-full items-baseline justify-between gap-4 border-b border-line py-2 text-left transition-opacity duration-300',
+                              dim && 'opacity-30',
+                            )}
+                          >
+                            <span
+                              className={cx(
+                                'stretch text-[clamp(1.2rem,1.7vw,1.5rem)] font-semibold leading-tight transition-colors duration-300',
+                                on ? 'text-ink' : 'text-ink-muted group-hover:text-ink',
+                              )}
+                              style={{ '--wdth-to': 122 } as React.CSSProperties}
+                            >
+                              {tool.name}
+                            </span>
+                            <span className={cx('mono mono-sm shrink-0', on ? 'text-measure' : 'text-ink-muted')}>
+                              {tool.projects.length} {tool.projects.length === 1 ? 'project' : 'projects'}
+                            </span>
+                          </button>
                         </li>
                       )
                     })}
                   </ul>
-                  {also.length > 0 ? (
-                    <p className={cx('mono mono-sm mt-3 text-ink-muted transition-opacity duration-300', filter && 'opacity-25')}>
-                      Also worked with — <span className="text-ink">{also.map((t) => t.name).join(' · ')}</span>
-                    </p>
+                  {!desktop && hasActive ? (
+                    <div className="mt-4">
+                      <Inspector tool={current} filter={filter} />
+                    </div>
                   ) : null}
-                </div>
-              </section>
-            )
-          })}
+                </section>
+              )
+            })}
+          </div>
+
+          {desktop ? (
+            <aside className="self-start lg:sticky lg:top-24" aria-label="Where this tool was used">
+              <p className="mono mb-3 text-ink-muted">Where it was used</p>
+              <Inspector tool={current} filter={filter} />
+            </aside>
+          ) : null}
         </div>
+
+        <p className="mono mono-sm mt-10 leading-relaxed text-ink-muted">
+          Also — <span className="text-ink">{toolkitAlso.join(' · ')}</span>
+        </p>
       </div>
     </SectionFrame>
   )

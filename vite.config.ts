@@ -57,7 +57,7 @@ function socialMeta(): Plugin {
         { attrs: { property: 'og:image', content: image } },
         { attrs: { property: 'og:image:width', content: '1200' } },
         { attrs: { property: 'og:image:height', content: '630' } },
-        { attrs: { property: 'og:image:alt', content: 'Sanath Waraikar — Backend + AI engineer' } },
+        { attrs: { property: 'og:image:alt', content: 'Sanath Waraikar — Backend × Applied AI' } },
         { attrs: { name: 'twitter:card', content: 'summary_large_image' } },
         { attrs: { name: 'twitter:image', content: image } },
       ]

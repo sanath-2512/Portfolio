@@ -286,7 +286,7 @@ export default function CaseStudy() {
     document.title = `WorthyApply — case study · Sanath Waraikar`
     return () => {
       cancelAnimationFrame(raf)
-      document.title = 'Sanath Waraikar — Backend + AI engineer'
+      document.title = 'Sanath Waraikar — Backend × Applied AI'
     }
   }, [])
 

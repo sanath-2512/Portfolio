@@ -139,7 +139,7 @@ export default function Hero() {
       const text =
         input.cellC >= 0
           ? `Cell C${String(input.cellC).padStart(3, '0')} · R${String(input.cellR).padStart(3, '0')}`
-          : 'Move the pointer to measure'
+          : profile.hint
       if (text !== lastCell && cell.current) {
         lastCell = text
         cell.current.textContent = text
@@ -170,14 +170,15 @@ export default function Hero() {
         </h1>
 
         <div className="grid12 mt-8 gap-y-5 border-t border-line pt-6 md:mt-12">
-          <p className="hero-split h3 col-span-4 max-w-[26ch] md:col-span-7">
+          <p className="hero-split h3 col-span-4 max-w-[22ch] md:col-span-6">
             {profile.positioning.lead}
             <span className="text-signal">{profile.positioning.emphasis}</span>
             {profile.positioning.tail}
           </p>
-          <p className="hero-split col-span-4 max-w-[44ch] text-ink-muted md:col-span-5 md:col-start-8 lg:col-span-4 lg:col-start-9">
-            {profile.supporting}
-          </p>
+          <div className="col-span-4 grid max-w-[50ch] gap-3 text-[16px] leading-relaxed md:col-span-6 md:col-start-7 lg:col-span-5 lg:col-start-8">
+            <p className="hero-split">{profile.supporting[0]}</p>
+            <p className="hero-split text-ink-muted">{profile.supporting[1]}</p>
+          </div>
         </div>
 
         <div className="mt-8 flex flex-wrap items-center gap-x-3 gap-y-3 md:mt-10">
@@ -192,29 +193,21 @@ export default function Hero() {
                   }}
                   className="btn btn-primary stretch-host"
                 >
-                  <StretchText reserve>See the work</StretchText>
+                  <StretchText reserve>Explore the work</StretchText>
                   <span aria-hidden="true">→</span>
                 </a>
               </Magnetic>
             </span>
           </span>
-          <Known value={profile.links.resume} label="Resume PDF">
-            {(href) => (
-              <span className="overflow-hidden">
-                <a href={href} target="_blank" rel="noreferrer" className="hero-cta btn btn-ghost stretch-host">
-                  <StretchText reserve>Resume</StretchText>
-                  <span aria-hidden="true">↗</span>
-                </a>
-              </span>
-            )}
-          </Known>
-          <span className="overflow-hidden md:ml-3">
-            <span className="hero-cta flex gap-x-5">
-              <a href={profile.links.github} target="_blank" rel="noreferrer" className="link mono">
-                <span className="link-rule">GitHub</span> ↗
+          <span className="overflow-hidden">
+            <span className="hero-cta flex gap-x-3">
+              <a href={profile.links.github} target="_blank" rel="noreferrer" className="btn btn-ghost stretch-host">
+                <StretchText reserve>GitHub</StretchText>
+                <span aria-hidden="true">↗</span>
               </a>
-              <a href={profile.links.linkedin} target="_blank" rel="noreferrer" className="link mono">
-                <span className="link-rule">LinkedIn</span> ↗
+              <a href={profile.links.linkedin} target="_blank" rel="noreferrer" className="btn btn-ghost stretch-host">
+                <StretchText reserve>LinkedIn</StretchText>
+                <span aria-hidden="true">↗</span>
               </a>
             </span>
           </span>
@@ -231,7 +224,7 @@ export default function Hero() {
 
       <div className="shell mt-10 flex flex-wrap items-end justify-between gap-x-6 gap-y-1 md:mt-14">
         <span ref={cell} className="mono mono-sm hidden text-measure [@media(pointer:fine)]:inline" aria-hidden="true">
-          Move the pointer to measure
+          {profile.hint}
         </span>
         <Known value={profile.location} label="Location / local time">{(loc) => <span className="mono mono-sm text-ink-muted">{loc.label}</span>}</Known>
         <span className="mono mono-sm text-ink-muted">

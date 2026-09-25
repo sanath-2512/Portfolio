@@ -113,16 +113,19 @@ export const profile = {
   name: 'Sanath Waraikar',
   first: 'Sanath',
   last: 'Waraikar',
-  role: 'Backend and AI engineer',
-  eyebrow: 'Backend + AI engineer · B.Tech (AI) 2024–28',
+  role: 'Backend × applied AI',
+  eyebrow: 'Backend × Applied AI × Systems',
   /** One word per heading carries the emphasis. */
   positioning: {
-    lead: 'I build AI systems that stay ',
-    emphasis: 'grounded',
-    tail: ', stay up, and get tested.',
+    lead: 'I build ',
+    emphasis: 'systems',
+    tail: ' around models — not just calls to them.',
   },
-  supporting:
-    'RAG over documents from 18+ banks, agentic pipelines with LangGraph, and FastAPI backends that fail over across five LLM providers.',
+  supporting: [
+    'I work at the intersection of backend engineering and applied AI: building APIs, retrieval systems, agentic workflows and evaluation layers that have to behave predictably outside a notebook.',
+    'Recently: document RAG across 18+ banks, multi-provider LLM failover, deterministic resume evaluation, and LangGraph pipelines.',
+  ],
+  hint: 'Move to explore',
   email: 'sanath.waraikar2024@nst.rishihood.edu.in',
   links: {
     github: 'https://github.com/sanath-2512',
@@ -153,21 +156,21 @@ export interface SectionMeta {
 
 /** Page order. Indices are printed as §0N and [0N/08]. */
 export const sections: SectionMeta[] = [
-  { id: 'top', index: '01', label: 'Overview', cal: 0 },
-  { id: 'about', index: '02', label: 'About', cal: 0.2 },
+  { id: 'top', index: '01', label: 'Intro', cal: 0 },
+  { id: 'about', index: '02', label: 'How I think', cal: 0.2 },
   { id: 'experience', index: '03', label: 'Experience', cal: 0.35 },
-  { id: 'work', index: '04', label: 'Work', cal: 0.55, calEnd: 0.8 },
+  { id: 'work', index: '04', label: 'Builds', cal: 0.55, calEnd: 0.8 },
   { id: 'process', index: '05', label: 'How I build', cal: 0.84 },
-  { id: 'stack', index: '06', label: 'Stack', cal: 0.9 },
-  { id: 'signals', index: '07', label: 'Signals', cal: 0.95 },
+  { id: 'stack', index: '06', label: 'Toolkit', cal: 0.9 },
+  { id: 'signals', index: '07', label: 'Outside the code', cal: 0.95 },
   { id: 'contact', index: '08', label: 'Contact', cal: 1 },
 ]
 
 export const navItems = [
-  { id: 'about', label: 'About' },
+  { id: 'about', label: 'How I think' },
   { id: 'experience', label: 'Experience' },
-  { id: 'work', label: 'Work' },
-  { id: 'stack', label: 'Stack' },
+  { id: 'work', label: 'Builds' },
+  { id: 'stack', label: 'Toolkit' },
   { id: 'contact', label: 'Contact' },
 ]
 
@@ -178,36 +181,35 @@ export const navItems = [
 export type Segment = string | { term: string; tag: 'TOOL' | 'SYSTEM' | 'ORG' | 'METRIC' }
 
 export const about = {
-  title: 'Reading me',
-  /** Sentences are split into words for the scrub; terms get a DETECT box. */
+  title: 'How I think',
+  /** Read word by word; [terms] get a DETECT box as they are read. */
   statement: [
-    "I'm a B.Tech (Artificial Intelligence) student at Newton School of Technology, Rishihood University.",
-    [
-      'I build Python backends and applied ML: ',
-      { term: 'FastAPI', tag: 'TOOL' },
-      ' services and REST APIs that put ',
-      { term: 'LLMs', tag: 'TOOL' },
-      ' to work.',
-    ],
-    [
-      'That has meant ',
-      { term: 'RAG', tag: 'SYSTEM' },
-      ' on ',
-      { term: 'AWS Bedrock', tag: 'TOOL' },
-      ' during my internship, and ',
-      { term: 'LangGraph', tag: 'TOOL' },
-      ' agents in my projects.',
-    ],
-    "Right now I'm going deeper into deep learning and advanced ML.",
+    "I'm interested in the part of AI that starts after the demo works.",
   ] as Array<string | Segment[]>,
-  spec: [
-    { key: 'Focus', value: 'Backend + applied AI' as Maybe<string> },
-    { key: 'Core', value: 'Python · FastAPI · LLMs · RAG' as Maybe<string> },
-    { key: 'Now', value: 'B.Tech (AI), 2024–28 · deep learning & advanced ML' as Maybe<string> },
-    { key: 'Off-screen', value: 'Inter-college badminton & cricket' as Maybe<string> },
-    { key: 'Based', value: todo('Location — not on the résumé') as Maybe<string> },
+  questions: [
+    'How does the system handle bad input?',
+    'What happens when a model times out?',
+    'Can an answer be traced back to evidence?',
+    'What happens when the model is simply wrong?',
   ],
-  tags: ['Backend', 'AI/ML', 'LLMs', 'RAG', 'Agents', 'AWS'],
+  closing: [
+    "That's where most of my recent work has taken me: backend systems, ",
+    { term: 'retrieval', tag: 'SYSTEM' },
+    ', ',
+    { term: 'structured outputs', tag: 'TOOL' },
+    ', agentic workflows and ',
+    { term: 'evaluation', tag: 'METRIC' },
+    '.',
+  ] as Segment[],
+  exploring: [
+    { no: '01', title: 'Backend', items: 'APIs · services · system design', where: 'EduAI · WorthyApply · AgriMind' },
+    { no: '02', title: 'Applied AI', items: 'LLMs · RAG · agents · evaluation', where: 'Fusion Cards · WorthyApply · AgriMind' },
+    { no: '03', title: 'Machine learning', items: 'Deep learning · model behaviour · prediction', where: 'AgriMind · coursework' },
+    { no: '04', title: 'System reliability', items: 'Validation · failover · testing · observability', where: 'WorthyApply' },
+  ],
+  offScreen: 'Badminton · Cricket · Building things that probably started as “this should be simple.”',
+  /** Kept for the dev-only TODO; not rendered in production until filled. */
+  based: todo('Location — not on the résumé') as Maybe<string>,
 }
 
 /* ------------------------------------------------------------------ */
@@ -215,6 +217,36 @@ export const about = {
 /* ------------------------------------------------------------------ */
 
 export const experience = {
+  title: 'Where I learned to ship',
+  intro: [
+    'I worked on enterprise document intelligence where the interesting problems weren’t “how do I call an LLM?”',
+    'They were retrieval quality, document structure, chunking strategy — and making information usable across credit-card documents from 18+ banks.',
+  ],
+  /** Three cards; `stages` highlight the matching steps of the pipeline strip. */
+  cards: [
+    {
+      no: '01',
+      title: 'Retrieval',
+      body: [
+        'Worked on a RAG knowledge-retrieval system spanning credit-card documents from ',
+        { metric: '18+ banks', source: 'fusion' as SourceKey },
+        '. The corpus included MITCs, terms & conditions, and fee schedules.',
+      ],
+      stages: ['index', 'retrieval', 'llm'],
+    },
+    {
+      no: '02',
+      title: 'Document pipeline',
+      body: ['Improved chunking strategies for shared bank-wide documents, where document structure mattered as much as the retrieval model.'],
+      stages: ['chunking'],
+    },
+    {
+      no: '03',
+      title: 'System design',
+      body: ['Analysed the production scraper → extractor → chunking pipeline and proposed architectural changes to improve how documents moved through the system.'],
+      stages: ['scraper', 'extractor', 'chunking'],
+    },
+  ] as Array<{ no: string; title: string; body: Array<string | { metric: string; source: SourceKey }>; stages: string[] }>,
   org: 'Fusion Cards',
   role: 'AI Software Engineer Intern',
   period: 'Jun 2026 – Aug 2026',
@@ -238,6 +270,12 @@ export const experience = {
   /** System-level only. Stage order is unconfirmed. */
   pipeline: {
     label: 'Simplified',
+    caption: 'A simplified view of the pipeline I worked around.',
+    phases: [
+      { id: 'document', label: 'Document', from: 0, to: 4 },
+      { id: 'retrieval', label: 'Retrieval', from: 4, to: 7 },
+      { id: 'reasoning', label: 'Reasoning', from: 7, to: 9 },
+    ],
     orderNote: todo('Confirm the exact stage order of the Fusion Cards pipeline'),
     stages: [
       { id: 'docs', label: 'Bank documents', note: '18+ banks' },
@@ -269,10 +307,56 @@ export interface ProjectLinks {
   demo: Maybe<string>
 }
 
+/** One step in a project's flow diagram. `tone` marks the step the story is about. */
+export interface FlowNode {
+  label: string
+  note?: string
+  tone?: 'signal' | 'measure'
+}
+
+/** Level 1 of every project: the short story, in this order. */
+export interface StoryRow {
+  /** Usually: What it is · Why I built it · The interesting problem · How it works · What I learned. */
+  k: string
+  v: string | string[]
+}
+
 export const worthyApply = {
   id: 'worthyapply',
   no: '01',
   name: 'WorthyApply',
+  kicker: 'AI resume engineering',
+  rule: 'Never make the candidate more impressive than their evidence.',
+  story: [
+    { k: 'What it is', v: 'A resume–job matching system designed around one rule.' },
+    {
+      k: 'The interesting problem',
+      v: [
+        'Most AI resume tools optimise for matching keywords.',
+        'That creates a dangerous failure mode: the model sees what a job wants and quietly invents the experience needed to match it.',
+      ],
+    },
+    {
+      k: 'How it works',
+      v: [
+        'WorthyApply treats the resume as evidence.',
+        'Requirements are classified against that evidence. The score is calculated in Python. Generated bullets are treated as patches, not replacements. Claims are checked before they reach the user. And if an LLM provider fails, the system moves on.',
+      ],
+    },
+  ] as StoryRow[],
+  flow: [
+    { label: 'Resume + job description' },
+    { label: 'Structured analysis', note: 'one typed call' },
+    { label: 'Requirement match', note: 'verdict per requirement' },
+    { label: 'Python score engine', note: 'the model never writes the number', tone: 'measure' },
+    { label: 'Tailor patch', note: 'edits, not a rewrite' },
+    { label: 'Claim check', note: 'hard claims removed', tone: 'signal' },
+    { label: 'Result', note: 'streamed over SSE' },
+  ] as FlowNode[],
+  interesting: [
+    'The model doesn’t decide the final score.',
+    'It provides structured evidence. Python makes the decision. The fact-check layer decides what is allowed to reach the user.',
+  ],
   domain: 'Resume–job fit',
   year: 'Sept 2026',
   oneLiner:
@@ -421,6 +505,28 @@ export const agriMind = {
   id: 'agrimind',
   no: '03',
   name: 'AgriMind',
+  kicker: 'Numbers + knowledge',
+  story: [
+    { k: 'What it is', v: 'A farm advisory system that combines a machine-learning prediction with retrieved agronomy knowledge.' },
+    {
+      k: 'How it works',
+      v: ['The prediction answers: “What might happen?”', 'The retrieval answers: “What does that mean?”', 'LangGraph connects the two.'],
+    },
+  ] as StoryRow[],
+  flow: [
+    { label: 'Farm inputs' },
+    { label: 'Yield model', note: 'scikit-learn' },
+    { label: 'Prediction', note: 'yield + category', tone: 'measure' },
+    { label: 'Retrieval', note: 'query carries the category', tone: 'signal' },
+    { label: 'Agronomy knowledge', note: 'ChromaDB, top 4' },
+    { label: 'Reasoning', note: 'LLM over both' },
+    { label: 'Structured report', note: 'fixed schema' },
+  ] as FlowNode[],
+  detail: [
+    'The retrieval query includes the predicted yield category.',
+    'So the system isn’t simply asking: “Tell me about this crop.”',
+    'It retrieves information relevant to the situation the model actually predicted.',
+  ],
   domain: 'Farm advisory',
   year: 'Mar 2026',
   oneLiner: 'An agentic farm-advisory system that combines crop-yield prediction with LLM retrieval.',
@@ -489,6 +595,23 @@ export const eduAI = {
   id: 'eduai',
   no: '02',
   name: 'EduAI',
+  kicker: 'What if an LLM had to build the whole course?',
+  story: [
+    { k: 'What it is', v: 'EduAI takes a topic and generates a complete learning path — modules, lessons, quizzes and a final assessment.' },
+    {
+      k: 'The interesting problem',
+      v: ['The interesting part wasn’t generating text.', 'It was making unreliable JSON behave like an API contract.'],
+    },
+  ] as StoryRow[],
+  flow: [
+    { label: 'LLM', note: 'Llama 3.3 70B via Groq' },
+    { label: 'JSON mode', note: 'max_tokens 8000' },
+    { label: 'Validation', note: 'parse + modules check', tone: 'measure' },
+    { label: 'Fallback', note: 'default course if it fails', tone: 'signal' },
+    { label: 'Database', note: 'Prisma → MongoDB' },
+    { label: 'Quiz', note: 'assembled from the course' },
+  ] as FlowNode[],
+  securityBlock: ['JWT authentication', 'bcrypt password hashing', 'Protected routes', 'Resource ownership checks', '19 REST endpoints'],
   domain: 'AI learning platform',
   year: 'Nov 2025',
   oneLiner:
@@ -574,6 +697,19 @@ export const viewly = {
   id: 'viewly',
   no: '04',
   name: 'Viewly',
+  kicker: 'The non-AI project',
+  story: [
+    { k: 'What it is', v: 'A movie discovery app built around the TMDB API.' },
+    { k: 'How it works', v: ['Search. Discover. Watch trailers. Save a watchlist.'] },
+    {
+      k: 'Why I built it',
+      v: [
+        'No LLM. No agents. No vector database.',
+        'Just a clean frontend, API integration, state management and persistence.',
+      ],
+    },
+  ] as StoryRow[],
+  techLine: ['React', 'TMDB API', 'Local storage', 'Routing', 'Netlify'],
   domain: 'Movie discovery',
   year: 'Jul 2025',
   oneLiner:
@@ -604,7 +740,13 @@ export const viewly = {
 export const dva = {
   id: 'dva',
   no: '05',
-  name: 'DVA Portfolio',
+  name: 'DVA',
+  kicker: 'Data, before the AI',
+  story: [
+    { k: 'What it is', v: 'Two team dashboards exploring agricultural productivity and retail performance.' },
+    { k: 'How it works', v: 'My role covered dashboard construction, presentation and quality review — plus the pivot calculations on the retail board.' },
+    { k: 'What I learned', v: 'The project was a reminder that good systems start with understanding the data.' },
+  ] as StoryRow[],
   domain: 'Data visualisation',
   year: '2026',
   oneLiner:
@@ -673,57 +815,59 @@ export const projectOrder = [worthyApply, eduAI, agriMind, viewly, dva] as const
 /* ------------------------------------------------------------------ */
 
 export const processStages = [
-  'Problem',
-  'Research',
-  'Architecture',
-  'Implementation',
-  'Evaluation',
-  'Optimization',
-  'Deployment',
+  { id: 'Understand', prompt: ['What problem are we actually solving?'] },
+  { id: 'Structure', prompt: ['What should be deterministic?', 'What actually needs a model?'] },
+  { id: 'Build', prompt: ['APIs · retrieval · agents · interfaces'] },
+  { id: 'Break', prompt: ['Bad inputs.', 'Timeouts.', 'Malformed output.', 'Hallucinations.'] },
+  { id: 'Measure', prompt: ['Tests.', 'Benchmarks.', 'Grounding.', 'Latency.'] },
+  { id: 'Ship', prompt: ['Deploy it.', 'Observe it.', 'Improve it.'] },
 ] as const
-export type ProcessStage = (typeof processStages)[number]
+export type ProcessStage = (typeof processStages)[number]['id']
 
-/** Stages with no real content are omitted, not padded. */
+/** How each project moved through the process. Stages a project didn't have stay empty. */
 export const processTabs: Array<{ id: string; label: string; steps: Partial<Record<ProcessStage, string>> }> = [
   {
     id: 'worthyapply',
     label: 'WorthyApply',
     steps: {
-      Problem: 'Tailoring models fabricate claims.',
-      Architecture: 'One structured analysis call, SSE streaming, failover across 5 providers.',
-      Implementation: 'Deterministic scoring in Python; tailoring as a patch; claim-level fact-check.',
-      Evaluation: '49 pytest tests, plus an offline adversarial benchmark for the fact-check.',
-      Deployment: 'FastAPI on Render, Next.js on Vercel.',
+      Understand: 'AI resume tailoring quietly invents experience to match a job.',
+      Structure: 'The model classifies requirements; Python owns the score; tailoring is a patch, not a rewrite.',
+      Build: 'FastAPI + SSE backend, a five-provider router, Next.js frontend.',
+      Break: 'Provider timeouts, invalid structured output, fixed adversarial model outputs.',
+      Measure: '49 pytest tests and an offline grounding benchmark.',
+      Ship: 'FastAPI on Render, Next.js on Vercel.',
     },
   },
   {
     id: 'eduai',
     label: 'EduAI',
     steps: {
-      Problem: 'A topic, but no structured path through it.',
-      Architecture: 'React SPA → Express REST API → Groq in JSON mode → Prisma on MongoDB.',
-      Implementation: 'bcrypt + JWT auth, per-owner checks, a default-course fallback for malformed output.',
-      Deployment: 'React on Vercel, Express on Render.',
+      Understand: 'A topic, but no structured path through it.',
+      Structure: 'The model writes the course; the API validates its shape and owns auth and ownership.',
+      Build: 'Express REST API (19 endpoints), Prisma on MongoDB, React.',
+      Break: 'Malformed or module-less JSON falls back to a default course.',
+      Ship: 'React on Vercel, Express on Render.',
     },
   },
   {
     id: 'agrimind',
     label: 'AgriMind',
     steps: {
-      Problem: 'Advice needs numbers and knowledge.',
-      Architecture: 'LangGraph state carries a yield prediction and retrieved passages into one reasoning step.',
-      Evaluation: 'Response consistency across structured and unstructured sources; relevance and reliability.',
-      Deployment: 'FastAPI on Render, React frontend.',
+      Understand: 'Advice needs numbers and knowledge.',
+      Structure: 'A model predicts; retrieval is conditioned on that prediction; an LLM reasons over both.',
+      Build: 'A four-node LangGraph, ChromaDB, FastAPI, React.',
+      Break: 'Node errors are written to state; the report is normalised even when the JSON is incomplete.',
+      Measure: 'Consistency across structured and unstructured sources; relevance and reliability.',
+      Ship: 'FastAPI on Render, React frontend.',
     },
   },
   {
     id: 'fusion',
     label: 'Fusion Cards',
     steps: {
-      Problem: 'Retrieval across shared documents from 18+ banks.',
-      Research: 'Analyzed the production data pipelines.',
-      Architecture: 'Proposed changes to the scraper, extractor and chunking workflows.',
-      Implementation: 'Improved chunking for MITC, T&Cs and fee schedules.',
+      Understand: 'Retrieval across shared documents from 18+ banks.',
+      Structure: 'Analysed the production scraper → extractor → chunking pipeline and proposed changes.',
+      Build: 'Improved chunking for MITCs, T&Cs and fee schedules.',
     },
   },
 ]
@@ -737,90 +881,71 @@ export const projectTags: ProjectTag[] = ['WorthyApply', 'EduAI', 'AgriMind', 'V
 
 export interface Tool {
   name: string
-  use?: string
+  /** One line: what it did in the work. */
+  use: string
   projects: ProjectTag[]
+  /** Revealed on hover / focus / tap: where exactly, in the real code. */
+  details: string[]
 }
 
-/**
- * Résumé categories. A tool links to a project only where that project's
- * repo (or the résumé) shows it; the rest go under "also worked with".
- */
-export const stack: Array<{ id: string; label: string; tools: Tool[] }> = [
+/** Four groups, not a logo wall. Every tool points at the projects that used it. */
+export const toolkit: Array<{ id: string; label: string; tools: Tool[] }> = [
   {
-    id: 'languages',
-    label: 'Languages',
+    id: 'build',
+    label: 'Build',
     tools: [
-      { name: 'Python', use: 'Backends, pipelines, the fact-check', projects: ['WorthyApply', 'AgriMind', 'Fusion Cards'] },
-      { name: 'TypeScript', use: 'Typed frontends', projects: ['WorthyApply', 'This site'] },
-      { name: 'JavaScript', use: 'Express APIs and React apps', projects: ['EduAI', 'Viewly', 'DVA'] },
-      { name: 'HTML/CSS', use: 'Hand-written styles and tokens', projects: ['EduAI', 'Viewly', 'This site'] },
-      { name: 'SQL', projects: [] },
+      { name: 'Python', use: 'Backends, pipelines, the fact-check', projects: ['WorthyApply', 'AgriMind', 'Fusion Cards'], details: ['FastAPI services', 'Deterministic scoring and claim checks', 'The LangGraph agent', 'Document pipelines'] },
+      { name: 'TypeScript', use: 'Typed frontends', projects: ['WorthyApply', 'This site'], details: ['WorthyApply’s Next.js app', 'This site'] },
+      { name: 'JavaScript', use: 'Express APIs and React apps', projects: ['EduAI', 'Viewly', 'DVA'], details: ['EduAI’s Express backend', 'Viewly and the DVA site'] },
+      { name: 'FastAPI', use: 'Analysis and advisory services', projects: ['WorthyApply', 'AgriMind'], details: ['REST + SSE endpoints for analyze, extract, tailor', 'AgriMind’s /predict backend'] },
+      { name: 'Next.js', use: 'App frontend', projects: ['WorthyApply'], details: ['Workspace, results and the resume builder'] },
+      { name: 'React', use: 'Every interface here', projects: ['EduAI', 'AgriMind', 'Viewly', 'DVA', 'This site'], details: ['Five apps, including this one'] },
+      { name: 'Node.js', use: 'API runtime', projects: ['EduAI'], details: ['EduAI’s backend on Render'] },
+      { name: 'Express', use: '19-endpoint REST API', projects: ['EduAI'], details: ['Auth, courses, quizzes, progress', 'JWT middleware on 13 routes'] },
     ],
   },
   {
-    id: 'backend',
-    label: 'Backend & APIs',
+    id: 'intelligence',
+    label: 'Intelligence',
     tools: [
-      { name: 'FastAPI', use: 'Analysis and advisory services', projects: ['WorthyApply', 'AgriMind'] },
-      { name: 'REST APIs', use: 'Designed in two apps, consumed in a third', projects: ['WorthyApply', 'EduAI', 'Viewly'] },
-      { name: 'Server-Sent Events', use: 'Streaming progress and tokens', projects: ['WorthyApply'] },
-      { name: 'Pydantic', use: 'Typed structured output', projects: ['WorthyApply'] },
-      { name: 'Pytest', use: '49 tests', projects: ['WorthyApply'] },
-      { name: 'Node.js', use: 'API runtime', projects: ['EduAI'] },
-      { name: 'Express.js', use: '19-endpoint REST API', projects: ['EduAI'] },
-      { name: 'Prisma ORM', use: 'Four models on MongoDB', projects: ['EduAI'] },
+      { name: 'LLMs', use: 'Analysis, reasoning, course generation', projects: ['WorthyApply', 'EduAI', 'AgriMind', 'Fusion Cards'], details: ['Structured analysis and tailoring', 'Whole-course JSON (Llama 3.3 70B)', 'Reasoning over prediction + passages', 'Retrieval answers on Bedrock'] },
+      { name: 'RAG', use: 'Retrieval over real documents', projects: ['Fusion Cards', 'AgriMind'], details: ['Credit-card documents from 18+ banks', 'Agronomy passages, top 4'] },
+      { name: 'LangChain', use: 'Provider adapters', projects: ['WorthyApply'], details: ['Adapters under the custom five-provider router'] },
+      { name: 'LangGraph', use: 'Multi-step agent state', projects: ['AgriMind'], details: ['predict → retrieve → reason → report'] },
+      { name: 'Machine Learning', use: 'Prediction', projects: ['AgriMind'], details: ['Crop-yield regression on farm inputs'] },
+      { name: 'scikit-learn', use: 'Yield model', projects: ['AgriMind'], details: ['LinearRegression + StandardScaler'] },
+      { name: 'Embeddings', use: 'Semantic search', projects: ['AgriMind'], details: ['all-MiniLM-L6-v2 in ChromaDB'] },
+      { name: 'Prompt Engineering', use: 'Structured-output prompts', projects: ['WorthyApply', 'EduAI', 'Fusion Cards'], details: ['One combined analysis prompt', 'A course schema the API can check', 'Document-pipeline prompts'] },
     ],
   },
   {
-    id: 'cloud',
-    label: 'Cloud & DevOps',
+    id: 'infrastructure',
+    label: 'Infrastructure',
     tools: [
-      { name: 'AWS Bedrock', use: 'Model access in document pipelines', projects: ['Fusion Cards'] },
-      { name: 'Amazon S3', use: 'Document storage', projects: ['Fusion Cards'] },
-      { name: 'Render', use: 'Python and Node backends', projects: ['WorthyApply', 'AgriMind', 'EduAI'] },
-      { name: 'Vercel', use: 'Frontends', projects: ['WorthyApply', 'AgriMind', 'EduAI'] },
-      { name: 'Git & GitHub', projects: [] },
+      { name: 'AWS Bedrock', use: 'Model access', projects: ['Fusion Cards'], details: ['Enterprise document pipelines'] },
+      { name: 'S3', use: 'Document storage', projects: ['Fusion Cards'], details: ['Bank documents for the retrieval system'] },
+      { name: 'OpenSearch', use: 'Retrieval index', projects: ['Fusion Cards'], details: ['The index the RAG system retrieves from'] },
+      { name: 'MongoDB', use: 'App data', projects: ['EduAI'], details: ['User, Course, Quiz, Progress via Prisma'] },
+      { name: 'ChromaDB', use: 'Knowledge store', projects: ['AgriMind'], details: ['Agronomy collection for retrieval'] },
+      { name: 'Render', use: 'Backends', projects: ['WorthyApply', 'AgriMind', 'EduAI'], details: ['Three production backends'] },
+      { name: 'Vercel', use: 'Frontends', projects: ['WorthyApply', 'AgriMind', 'EduAI'], details: ['Three production frontends'] },
     ],
   },
   {
-    id: 'databases',
-    label: 'Databases',
+    id: 'quality',
+    label: 'Quality',
     tools: [
-      { name: 'OpenSearch', use: 'Retrieval index', projects: ['Fusion Cards'] },
-      { name: 'ChromaDB', use: 'Agronomy knowledge store', projects: ['AgriMind'] },
-      { name: 'MongoDB', use: 'Courses, quizzes, progress', projects: ['EduAI'] },
-      { name: 'MySQL', projects: [] },
-    ],
-  },
-  {
-    id: 'ai',
-    label: 'AI / ML',
-    tools: [
-      { name: 'LLMs', use: 'Structured analysis, reasoning, course generation', projects: ['WorthyApply', 'EduAI', 'AgriMind', 'Fusion Cards'] },
-      { name: 'RAG', use: 'Retrieval over bank documents and agronomy', projects: ['AgriMind', 'Fusion Cards'] },
-      { name: 'LangChain', use: 'Provider adapters under the router', projects: ['WorthyApply'] },
-      { name: 'LangGraph', use: 'Multi-step agent state', projects: ['AgriMind'] },
-      { name: 'Prompt Engineering', use: 'Structured-output and pipeline prompts', projects: ['WorthyApply', 'EduAI', 'Fusion Cards'] },
-      { name: 'Vector Embeddings', use: 'all-MiniLM-L6-v2 in ChromaDB', projects: ['AgriMind'] },
-      { name: 'Machine Learning', use: 'Crop-yield regression', projects: ['AgriMind'] },
-      { name: 'scikit-learn', use: 'Yield model', projects: ['AgriMind'] },
-      { name: 'Hugging Face', projects: [] },
-    ],
-  },
-  {
-    id: 'frontend',
-    label: 'Frontend',
-    tools: [
-      { name: 'React', use: 'Every interface here', projects: ['EduAI', 'AgriMind', 'Viewly', 'DVA', 'This site'] },
-      { name: 'Next.js', use: 'App frontend', projects: ['WorthyApply'] },
-      { name: 'Tailwind CSS', use: 'Utility layer over tokens', projects: ['DVA', 'This site'] },
-      { name: 'Three.js', use: 'The calibration field', projects: ['This site'] },
-      { name: 'GSAP', use: 'Scroll choreography', projects: ['This site'] },
-      { name: 'Lenis', use: 'Smooth scroll', projects: ['This site'] },
-      { name: 'Vite', use: 'Build', projects: ['EduAI', 'Viewly', 'DVA', 'This site'] },
+      { name: 'Pydantic', use: 'Typed structured output', projects: ['WorthyApply'], details: ['JobAnalysis · MatchAnalysis · ResumeOptimization'] },
+      { name: 'Pytest', use: '49 tests', projects: ['WorthyApply'], details: ['→ grounding', '→ provider failover', '→ scoring', '→ structured output'] },
+      { name: 'Structured outputs', use: 'Contracts, not prose', projects: ['WorthyApply', 'EduAI', 'AgriMind'], details: ['One typed analysis object', 'Course JSON in JSON mode', 'JSON-mode advisory report'] },
+      { name: 'Deterministic validation', use: 'Code decides, not the model', projects: ['WorthyApply', 'AgriMind'], details: ['Score computed in Python', 'Claim-level fact-check', 'Report normalised to one schema'] },
+      { name: 'SSE', use: 'Streaming', projects: ['WorthyApply'], details: ['/api/analyze/stream · /api/tailor-resume/stream'] },
     ],
   },
 ]
+
+/** Also on the résumé or in this site's build, without a story of their own here. */
+export const toolkitAlso = ['SQL', 'HTML/CSS', 'Prisma ORM', 'MySQL', 'Git & GitHub', 'Hugging Face', 'Tailwind CSS', 'Three.js', 'GSAP', 'Vite']
 
 /* ------------------------------------------------------------------ */
 /* §07 Signals                                                        */
@@ -834,10 +959,9 @@ export const signals: Array<{
   links?: Array<{ label: string; href: string }>
   note?: Todo
 }> = [
-  { year: '2025', what: 'GirlScript Summer of Code', detail: 'Open-source contributor', tag: 'ORG', note: todo('Links to GSSoC 2025 contributions') },
-  { year: '2026', what: 'GirlScript Summer of Code', detail: 'Open-source contributor', tag: 'ORG', note: todo('Links to GSSoC 2026 contributions') },
+  { year: '2025', what: 'GirlScript Summer of Code', detail: 'Open-source contribution', tag: 'ORG', note: todo('Links to GSSoC 2025 contributions') },
+  { year: '2026', what: 'GirlScript Summer of Code', detail: 'Open-source contribution', tag: 'ORG', note: todo('Links to GSSoC 2026 contributions') },
   { year: '2026', what: 'Thapar Institute Tech Fest', detail: 'Built two working projects under time constraints', tag: 'ORG' },
-  { year: todo('Buildspace hackathon year'), what: 'Buildspace hackathon', detail: 'Top 7 finish', tag: 'METRIC' },
   {
     year: 'ongoing',
     what: 'Competitive programming',
@@ -857,7 +981,12 @@ export const signals: Array<{
 /* ------------------------------------------------------------------ */
 
 export const contact = {
-  headline: "Let's build something useful.",
+  /** Two lines; the last word carries the emphasis. */
+  headline: ['Got a problem', 'worth building?'],
+  body: [
+    "I'm interested in backend, applied AI and ML systems — especially problems where the engineering is as interesting as the model.",
+    "If there's something worth building, send it over.",
+  ],
 }
 
 /* ------------------------------------------------------------------ */
@@ -870,7 +999,7 @@ export const build = {
 }
 
 export const siteMeta = {
-  title: `${profile.name} — Backend + AI engineer`,
+  title: `${profile.name} — Backend × Applied AI`,
   description:
-    'Sanath Waraikar builds LLM systems that stay grounded: RAG over real documents, agentic pipelines, and resilient FastAPI backends.',
+    'Sanath Waraikar builds systems around models — not just calls to them: retrieval, agentic workflows, failover and evaluation.',
 }

@@ -8,7 +8,7 @@ import { DetectBox } from '@/components/motion/DetectBox'
 import { StretchHeading } from '@/components/motion/StretchHeading'
 import { Known, TodoNote } from '@/components/ui/Todo'
 
-/** §07 Signals: a log, one entry a line, each detected and cited. It flushes in, line by line. */
+/** §07 Outside the code: a log, one entry a line, each detected and cited. It flushes in, line by line. */
 export default function Signals() {
   const log = useRef<HTMLOListElement | null>(null)
 
@@ -47,8 +47,10 @@ export default function Signals() {
     <SectionFrame id="signals" className="section-pad relative z-10">
       <div className="shell mt-12 lg:mt-16">
         <div className="flex flex-wrap items-end justify-between gap-6">
-          <StretchHeading id="signals-title">Signals</StretchHeading>
-          <p className="mono max-w-[40ch] text-ink-muted">Outside the day job, logged with sources.</p>
+          <StretchHeading id="signals-title">
+            Outside the <span style={{ fontVariationSettings: "'wdth' 125" }}>code</span>
+          </StretchHeading>
+          <p className="max-w-[36ch] text-[clamp(1.05rem,1.4vw,1.2rem)] leading-relaxed text-ink-muted">A few things that happened along the way.</p>
         </div>
 
         <ol ref={log} className="mono mt-12 border border-line bg-bg" aria-label="Activity log">

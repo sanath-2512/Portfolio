@@ -6,7 +6,7 @@ export function Footer() {
     <footer className="relative z-10 border-t border-line bg-bg">
       <div className="shell flex flex-col gap-2 py-6 sm:flex-row sm:items-center sm:justify-between">
         <p className="mono text-ink-muted">
-          © {new Date().getFullYear()} {profile.name}
+          <span className="text-ink">{profile.name}</span> · {profile.role} · © {new Date().getFullYear()}
         </p>
         <p className="mono text-ink-muted">
           Build <span className="text-ink">{build.sha}</span> · Updated <span className="text-ink">{build.date}</span>

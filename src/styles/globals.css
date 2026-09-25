@@ -793,3 +793,53 @@
   text-decoration-thickness: 2px;
   text-underline-offset: 3px;
 }
+
+/* Flow diagrams: a step registers as the packet reaches it. */
+.flow-step .flow-label {
+  color: var(--ink-muted);
+  transition: color 0.3s var(--ease-out);
+}
+.flow-step.is-on .flow-label {
+  color: var(--ink);
+}
+.flow-step.is-on .flow-dot {
+  background: var(--ink);
+  border-color: var(--ink);
+}
+.flow-step.is-on .flow-dot[data-tone='signal'] {
+  background: var(--signal);
+  border-color: var(--signal);
+}
+.flow-step.is-on .flow-dot[data-tone='measure'] {
+  background: var(--measure);
+  border-color: var(--measure);
+}
+
+/* AgriMind query anatomy: the generic question is struck, the category is detected. */
+.qa-anatomy.is-on .qa-generic .fc-strike {
+  background-size: 100% 2px;
+  color: var(--ink-muted);
+}
+.qa-anatomy.is-on .qa-cat .detect-box > i {
+  transform: scale(1);
+  transition-delay: 0.5s;
+}
+.qa-anatomy.is-on .qa-cat .detect-tag {
+  opacity: 1;
+  transform: none;
+  transition-delay: 0.65s;
+}
+.ag-trace li.is-on .ag-step {
+  color: var(--measure);
+}
+.ag-trace li.is-on .ag-line {
+  color: var(--ink);
+}
+
+/* Experience: a card points at the pipeline stages it touched. */
+.strip-dim {
+  opacity: 0.35;
+}
+.strip-focus .detect-box > i {
+  transform: scale(1);
+}
