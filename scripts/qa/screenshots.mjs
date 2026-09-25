@@ -26,6 +26,10 @@ const themes = opt('themes', 'dark').split(',')
 const reduced = flag('reduced')
 const viewportOnly = flag('viewport-only')
 const noWebgl = flag('no-webgl')
+const cores = opt('cores', null)
+// Headless GL is SwiftShader, which the site treats as software GL and skips.
+// --force-gpu reports a hardware renderer so the WebGL path can be captured.
+const forceGpu = flag('force-gpu')
 const heights = { 1440: 900, 1280: 800, 1024: 768, 768: 1024, 430: 932, 390: 844 }
 
 await mkdir(out, { recursive: true })
@@ -49,6 +53,20 @@ for (const theme of themes) {
       hasTouch: mobile,
       isMobile: mobile,
     })
+    if (cores) {
+      await context.addInitScript((n) => Object.defineProperty(navigator, 'hardwareConcurrency', { get: () => n }), Number(cores))
+    }
+    if (forceGpu) {
+      await context.addInitScript(() => {
+        for (const C of [WebGLRenderingContext, WebGL2RenderingContext]) {
+          const get = C.prototype.getParameter
+          C.prototype.getParameter = function (p) {
+            if (p === 0x9246 || p === 0x1f01) return 'Test GPU (forced)'
+            return get.call(this, p)
+          }
+        }
+      })
+    }
     // Pin the theme explicitly so a stored preference can't override the run.
     await context.addInitScript((t) => {
       try {

@@ -1,10 +1,11 @@
 import gsap from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
+import { SplitText } from 'gsap/SplitText'
 
-gsap.registerPlugin(ScrollTrigger)
+gsap.registerPlugin(ScrollTrigger, SplitText)
 
-// ScrollTrigger is driven manually from the Lenis scroll callback, so lag
-// smoothing must be off or the two disagree after a stall.
+// ScrollTrigger is driven from the Lenis scroll callback, so lag smoothing
+// must be off or the two disagree after a stall.
 gsap.ticker.lagSmoothing(0)
 
-export { gsap, ScrollTrigger }
+export { gsap, ScrollTrigger, SplitText }

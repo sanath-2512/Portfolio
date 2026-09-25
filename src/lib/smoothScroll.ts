@@ -1,19 +1,20 @@
 import Lenis from 'lenis'
 import { gsap, ScrollTrigger } from '@/lib/gsap'
-import { prefersReducedMotion } from '@/lib/utils'
+import { isCoarsePointer, prefersReducedMotion } from '@/lib/utils'
 
 let instance: Lenis | null = null
 
-/** Height of the fixed nav, so anchored sections don't land under it. */
-const NAV_OFFSET = -12
+/** Compact nav height; anchored headings land just below it. */
+const NAV_OFFSET = -48
+
+export const getLenis = () => instance
 
 /**
- * Starts Lenis and makes it the single source of scroll truth for
- * ScrollTrigger. Returns a teardown. No-op under reduced motion, where the
- * browser's own scrolling is used instead.
+ * Starts Lenis and makes it ScrollTrigger's scroll source. Touch devices and
+ * reduced motion keep native scrolling. Returns a teardown.
  */
 export function initSmoothScroll(): () => void {
-  if (prefersReducedMotion()) {
+  if (prefersReducedMotion() || isCoarsePointer()) {
     ScrollTrigger.refresh()
     return () => {}
   }
@@ -21,7 +22,6 @@ export function initSmoothScroll(): () => void {
   const lenis = new Lenis({
     duration: 1.1,
     easing: (t: number) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
-    orientation: 'vertical',
     smoothWheel: true,
     syncTouch: false,
     overscroll: false,
@@ -33,7 +33,6 @@ export function initSmoothScroll(): () => void {
 
   lenis.on('scroll', onScroll)
   gsap.ticker.add(raf)
-
   ScrollTrigger.refresh()
 
   return () => {
@@ -44,32 +43,26 @@ export function initSmoothScroll(): () => void {
   }
 }
 
-/** Scrolls to a section id through the smooth-scroll API. */
+/** Every in-page anchor goes through here. */
 export function scrollToId(id: string) {
   const target = document.getElementById(id)
   if (!target) return
-
   if (instance) {
     instance.scrollTo(target, { offset: NAV_OFFSET })
-    return
+  } else {
+    const top = target.getBoundingClientRect().top + window.scrollY + NAV_OFFSET
+    window.scrollTo({ top, behavior: prefersReducedMotion() ? 'auto' : 'smooth' })
   }
-  const top = target.getBoundingClientRect().top + window.scrollY + NAV_OFFSET
-  window.scrollTo({ top, behavior: prefersReducedMotion() ? 'auto' : 'smooth' })
+  // Move focus for keyboard and screen-reader users without a second jump.
+  if (!target.hasAttribute('tabindex')) target.setAttribute('tabindex', '-1')
+  target.focus({ preventScroll: true })
 }
 
 export function scrollToTop() {
-  if (instance) {
-    instance.scrollTo(0)
-    return
-  }
-  window.scrollTo({ top: 0, behavior: prefersReducedMotion() ? 'auto' : 'smooth' })
+  if (instance) instance.scrollTo(0)
+  else window.scrollTo({ top: 0, behavior: prefersReducedMotion() ? 'auto' : 'smooth' })
 }
 
-/** Pauses smooth scroll (used while the mobile menu owns the viewport). */
-export function pauseSmoothScroll() {
-  instance?.stop()
-}
-
-export function resumeSmoothScroll() {
-  instance?.start()
-}
+/** Used while the mobile menu owns the viewport. */
+export const pauseSmoothScroll = () => instance?.stop()
+export const resumeSmoothScroll = () => instance?.start()

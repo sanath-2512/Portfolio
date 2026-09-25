@@ -2,12 +2,11 @@ import { useEffect, useState } from 'react'
 import { ScrollTrigger } from '@/lib/gsap'
 
 /**
- * Tracks which section currently owns the viewport, using the same
- * ScrollTrigger instance that drives the rest of the page so the nav
- * indicator can never disagree with the scroll position.
+ * Which section owns the middle of the viewport. Uses ScrollTrigger so the
+ * nav can never disagree with the rest of the scroll choreography, and only
+ * re-renders when the owner changes.
  */
 export function useActiveSection(ids: string[]): string {
-  // Nothing is highlighted until a section actually owns the viewport.
   const [active, setActive] = useState('')
 
   useEffect(() => {
@@ -17,16 +16,16 @@ export function useActiveSection(ids: string[]): string {
         if (!el) return null
         return ScrollTrigger.create({
           trigger: el,
-          start: 'top 45%',
-          end: 'bottom 45%',
+          start: 'top 50%',
+          end: 'bottom 50%',
           onToggle: (self) => {
             if (self.isActive) setActive(id)
+            else setActive((current) => (current === id ? '' : current))
           },
         })
       })
       .filter(Boolean) as ScrollTrigger[]
 
-    ScrollTrigger.refresh()
     return () => triggers.forEach((t) => t.kill())
   }, [ids])
 

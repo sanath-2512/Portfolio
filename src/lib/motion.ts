@@ -1,190 +1,146 @@
 import { gsap, ScrollTrigger } from '@/lib/gsap'
 import { prefersReducedMotion } from '@/lib/utils'
 
-/* ------------------------------------------------------------------ */
-/* Tokens — every tween on the site uses these                        */
-/* ------------------------------------------------------------------ */
+/* ================================================================== */
+/* Timing — every tween on the site reads from here                    */
+/* ================================================================== */
 
-/** Primary easing for entrances. */
-export const EASE = 'power3.out'
-/** Scrubbed motion is linear — it is driven by scroll position, not time. */
+/** Entrances. Same curve as the CSS `--ease-out` token. */
+export const EASE = 'expo.out'
+export const EASE_CSS = 'cubic-bezier(0.16, 1, 0.3, 1)'
+/** Scrubbed motion follows the scroll position, not a clock. */
 export const SCRUB_EASE = 'none'
+export const SCRUB_EASE_SOFT = 'power2.inOut'
 
-export const DUR = { short: 0.4, base: 0.8, long: 1.2 } as const
-export const STAGGER = { tight: 0.06, loose: 0.1 } as const
+export const DUR = {
+  /** Micro-interactions: 0.2–0.35 s. */
+  micro: 0.28,
+  /** Entrances: 0.6–1.2 s. */
+  in: 0.9,
+  long: 1.2,
+  /** Route and theme wipes stay under 0.6 s. */
+  wipe: 0.56,
+} as const
 
-/** Below this width, pinned sequences degrade to simple reveals. */
-export const PIN_MIN_WIDTH = 768
+export const STAGGER = 0.06
 
-export const isDesktopQuery = `(min-width: ${PIN_MIN_WIDTH}px)`
+/** Width axis limits of Archivo. */
+export const WDTH = { min: 62, rest: 100, max: 125 } as const
 
-type Targets = gsap.TweenTarget
+export const MQ = {
+  desktop: '(min-width: 1024px) and (prefers-reduced-motion: no-preference)',
+  mobile: '(max-width: 1023px) and (prefers-reduced-motion: no-preference)',
+  motion: '(prefers-reduced-motion: no-preference)',
+  reduced: '(prefers-reduced-motion: reduce)',
+} as const
 
-/* ------------------------------------------------------------------ */
-/* Helpers — sections call these instead of writing one-off tweens     */
-/* ------------------------------------------------------------------ */
+/* ================================================================== */
+/* SCAN — a 1px measure beam sweeps across and reveals what's behind   */
+/* ================================================================== */
 
-interface RevealOptions {
+interface ScanOptions {
+  axis?: 'x' | 'y'
+  duration?: number
   delay?: number
-  stagger?: number
-  trigger?: Element | string | null
-  start?: string
-  once?: boolean
 }
 
 /**
- * Line-mask reveal. Targets are `.line-mask > span` elements that slide up
- * from behind their overflow-hidden parent.
+ * Reveals `content` with clip-path while `beam` rides the leading edge.
+ * The beam must sit outside the clipped element (see <ScanReveal>).
  */
-export function revealText(targets: Targets, options: RevealOptions = {}): gsap.core.Tween {
-  const { delay = 0, stagger = STAGGER.tight, trigger, start = 'top 82%' } = options
+export function scan(content: Element, beam: Element | null, options: ScanOptions = {}): gsap.core.Timeline {
+  const { axis = 'x', duration = DUR.in, delay = 0 } = options
+  const tl = gsap.timeline({ delay })
 
   if (prefersReducedMotion()) {
-    return gsap.to(targets, { opacity: 1, duration: DUR.short, delay, stagger: 0 })
+    tl.set(content, { clipPath: 'inset(0 0% 0% 0)' })
+    return tl
   }
 
-  return gsap.fromTo(
-    targets,
-    { yPercent: 108, opacity: 0 },
-    {
-      yPercent: 0,
-      opacity: 1,
-      duration: DUR.long,
-      ease: EASE,
-      delay,
-      stagger,
-      ...(trigger ? { scrollTrigger: { trigger, start, once: true } } : {}),
-    },
-  )
-}
+  const from = axis === 'x' ? 'inset(0 100% 0 0)' : 'inset(0 0 100% 0)'
+  const to = 'inset(0 0% 0% 0)'
+  tl.fromTo(content, { clipPath: from }, { clipPath: to, duration, ease: EASE })
 
-/** Group-level reveal: one tween per section, not one per element. */
-export function revealUp(targets: Targets, options: RevealOptions = {}): gsap.core.Tween {
-  const { delay = 0, stagger = STAGGER.loose, trigger, start = 'top 82%' } = options
-
-  if (prefersReducedMotion()) {
-    return gsap.to(targets, { opacity: 1, duration: DUR.short, delay })
+  if (beam) {
+    const host = beam.parentElement as HTMLElement
+    const size = () => (axis === 'x' ? host.offsetWidth : host.offsetHeight)
+    tl.set(beam, { opacity: 1 }, 0)
+    tl.fromTo(
+      beam,
+      axis === 'x' ? { x: 0, y: 0 } : { x: 0, y: 0 },
+      { ...(axis === 'x' ? { x: size } : { y: size }), duration, ease: EASE },
+      0,
+    )
+    tl.to(beam, { opacity: 0, duration: DUR.micro }, duration * 0.72)
   }
-
-  return gsap.fromTo(
-    targets,
-    { y: 28, opacity: 0 },
-    {
-      y: 0,
-      opacity: 1,
-      duration: DUR.base,
-      ease: EASE,
-      delay,
-      stagger,
-      ...(trigger ? { scrollTrigger: { trigger, start, once: true } } : {}),
-    },
-  )
+  return tl
 }
 
-interface CountUpOptions {
-  /** Starting value — defaults to 0. */
-  from?: number
+/* ================================================================== */
+/* MEASURE — a dimension line draws while a counter runs               */
+/* ================================================================== */
+
+interface MeasureOptions {
+  value?: number
   decimals?: number
   suffix?: string
-  prefix?: string
   duration?: number
-  scrub?: boolean
-  trigger?: Element | string | null
-  start?: string
-  end?: string
 }
 
-/** Counts an element's text up to `value`, once on enter (or scrubbed). */
-export function countUp(el: HTMLElement, value: number, options: CountUpOptions = {}): void {
-  const {
-    from = 0,
-    decimals = 0,
-    suffix = '',
-    prefix = '',
-    duration = DUR.long,
-    scrub = false,
-    trigger = el,
-    start = 'top 85%',
-    end = 'bottom 60%',
-  } = options
-
+/** `rules` are the two half-lines either side of the label; they grow outward. */
+export function measure(
+  rules: Element[],
+  counter: HTMLElement | null,
+  options: MeasureOptions = {},
+): gsap.core.Timeline {
+  const { value, decimals = 0, suffix = '', duration = DUR.in } = options
+  const tl = gsap.timeline()
   const write = (n: number) => {
-    el.textContent = `${prefix}${n.toFixed(decimals)}${suffix}`
+    if (counter && value !== undefined) counter.textContent = `${n.toFixed(decimals)}${suffix}`
   }
 
   if (prefersReducedMotion()) {
-    write(value)
-    return
+    tl.set(rules, { scaleX: 1 })
+    write(value ?? 0)
+    return tl
   }
 
-  const state = { n: from }
-  write(from)
-
-  gsap.to(state, {
-    n: value,
-    duration: scrub ? 1 : duration,
-    ease: scrub ? SCRUB_EASE : EASE,
-    onUpdate: () => write(state.n),
-    scrollTrigger: scrub
-      ? { trigger, start, end, scrub: true }
-      : { trigger, start, once: true },
-  })
+  tl.fromTo(rules, { scaleX: 0 }, { scaleX: 1, duration, ease: EASE })
+  if (counter && value !== undefined) {
+    const state = { n: 0 }
+    write(0)
+    tl.to(state, { n: value, duration, ease: EASE, onUpdate: () => write(state.n) }, 0)
+  }
+  return tl
 }
 
-interface PinSequenceOptions {
-  /** Extra scroll distance, as a multiple of viewport height. */
-  distance?: number
-  start?: string
+/* ================================================================== */
+/* STRETCH — headings enter condensed and settle to their rest width   */
+/* ================================================================== */
+
+export function stretchIn(targets: gsap.TweenTarget, rest: number = WDTH.rest, options: { delay?: number } = {}) {
+  if (prefersReducedMotion()) return gsap.set(targets, { '--wdth': rest })
+  return gsap.fromTo(
+    targets,
+    { '--wdth': WDTH.min },
+    { '--wdth': rest, duration: DUR.long, ease: EASE, delay: options.delay ?? 0, stagger: STAGGER },
+  )
 }
+
+/* ================================================================== */
+/* DETECT — corner brackets draw in around a term                      */
+/* ================================================================== */
+
+export function detectOn(el: Element | null, on = true) {
+  el?.classList.toggle('is-on', on)
+}
+
+/* ================================================================== */
+/* Layout settling                                                     */
+/* ================================================================== */
 
 /**
- * Builds a pinned, scrubbed timeline on desktop and hands back a plain
- * timeline on small screens, where the caller reveals content instead.
- */
-export function pinSequence(
-  trigger: Element,
-  options: PinSequenceOptions = {},
-): gsap.core.Timeline {
-  const { distance = 1.6, start = 'top top' } = options
-
-  return gsap.timeline({
-    scrollTrigger: {
-      trigger,
-      start,
-      end: () => `+=${window.innerHeight * distance}`,
-      pin: true,
-      scrub: 0.6,
-      anticipatePin: 1,
-      invalidateOnRefresh: true,
-    },
-  })
-}
-
-/** Subtle scroll parallax. Transform only. */
-export function parallax(targets: Targets, strength = 8): void {
-  if (prefersReducedMotion()) return
-
-  gsap.utils.toArray<HTMLElement>(targets as string).forEach((el) => {
-    gsap.fromTo(
-      el,
-      { yPercent: strength },
-      {
-        yPercent: -strength,
-        ease: SCRUB_EASE,
-        scrollTrigger: {
-          trigger: el,
-          start: 'top bottom',
-          end: 'bottom top',
-          scrub: true,
-          invalidateOnRefresh: true,
-        },
-      },
-    )
-  })
-}
-
-/**
- * Re-measures every trigger once webfonts have settled and again on
+ * Re-measures every trigger once webfonts and images have settled and on
  * orientation change, so pinned sections stay aligned.
  */
 export function refreshOnLayoutSettled(): () => void {

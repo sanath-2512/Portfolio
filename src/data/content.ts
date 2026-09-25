@@ -1,484 +1,634 @@
 /**
- * Single source of truth for every fact rendered on this site.
- * Components read from here — nothing is hardcoded in a section.
+ * Single source of truth for every fact on this site.
  *
- * Rule: a value only lives here if it can be traced to the resume in
- * /public, to shipped work, or to the brief. Unknown URLs are `null`
- * with a TODO, never guessed — `null` renders the link disabled.
+ * Priority of sources:
+ *   1. Résumé, September 2026 (the brief's Appendix A)
+ *   2. The source repos, where they clearly confirm something:
+ *        github.com/sanath-2512/Worthyapply   @ 7a28d98
+ *        github.com/Agrim-2007/AgriMind        @ 9404976
+ *   3. This repo
+ *
+ * Anything unknown is a `todo(...)`. In development it renders as a dashed
+ * placeholder; in production the field is hidden. Nothing here is guessed.
+ * See docs/redesign/AUDIT.md for every conflict and omission.
  */
 
-export type ExternalLink = string | null
+/* ------------------------------------------------------------------ */
+/* TODO(user) markers                                                  */
+/* ------------------------------------------------------------------ */
 
-export interface Profile {
-  name: string
-  shortName: string
-  role: string
-  statement: string
-  email: string
-  links: {
-    github: string
-    linkedin: string
-    resume: string
-  }
+export interface Todo {
+  readonly todo: string
+}
+export type Maybe<T> = T | Todo
+
+/** TODO(user): a value only Sanath can supply. */
+export const todo = (note: string): Todo => ({ todo: note })
+export const isTodo = (value: unknown): value is Todo =>
+  typeof value === 'object' && value !== null && 'todo' in value
+
+/* ------------------------------------------------------------------ */
+/* Citations — every number on the page points at one of these         */
+/* ------------------------------------------------------------------ */
+
+export interface Source {
+  /** Printed in brackets, e.g. [1]. Fixed so numbering is stable page-wide. */
+  n: number
+  label: string
+  detail: string
+  href?: string
 }
 
-export const profile: Profile = {
+const WA_REPO = 'https://github.com/sanath-2512/Worthyapply'
+const AGRI_REPO = 'https://github.com/Agrim-2007/AgriMind'
+
+export const sources = {
+  fusion: {
+    n: 1,
+    label: 'Fusion Cards internship',
+    detail: 'AI Software Engineer Intern, Jun–Aug 2026. Résumé, Sept 2026.',
+  },
+  waTests: {
+    n: 2,
+    label: 'WorthyApply /backend/tests',
+    detail: '49 test functions across five pytest files.',
+    href: `${WA_REPO}/tree/main/backend/tests`,
+  },
+  waRouter: {
+    n: 3,
+    label: 'WorthyApply llm_router/config.py',
+    detail: 'Five providers, priority order and per-provider timeouts.',
+    href: `${WA_REPO}/blob/main/backend/llm_router/config.py`,
+  },
+  waGrounding: {
+    n: 4,
+    label: 'WorthyApply test_grounding.py',
+    detail: '26 tests covering evidence checks and the tailoring fact-check.',
+    href: `${WA_REPO}/blob/main/backend/tests/test_grounding.py`,
+  },
+  agriGraph: {
+    n: 5,
+    label: 'AgriMind reference_agent/graph.py',
+    detail: 'The compiled LangGraph StateGraph.',
+    href: `${AGRI_REPO}/blob/main/src/reference_agent/graph.py`,
+  },
+  resume: {
+    n: 6,
+    label: 'Résumé, Sept 2026',
+    detail: 'Education and activities.',
+  },
+} satisfies Record<string, Source>
+
+export type SourceKey = keyof typeof sources
+
+/* ------------------------------------------------------------------ */
+/* Profile                                                            */
+/* ------------------------------------------------------------------ */
+
+export const profile = {
   name: 'Sanath Waraikar',
-  shortName: 'Sanath',
-  role: 'AI Engineer & Full-Stack Developer',
-  statement:
-    'I build LLM and RAG systems, backend services, and the full-stack products they ship inside.',
+  first: 'Sanath',
+  last: 'Waraikar',
+  role: 'Backend and AI engineer',
+  eyebrow: 'Backend + AI engineer · B.Tech (AI) 2024–28',
+  /** One word per heading carries the emphasis. */
+  positioning: {
+    lead: 'I build AI systems that stay ',
+    emphasis: 'grounded',
+    tail: ', stay up, and get tested.',
+  },
+  supporting:
+    'RAG over documents from 18+ banks, agentic pipelines with LangGraph, and FastAPI backends that fail over across five LLM providers.',
   email: 'sanath.waraikar2024@nst.rishihood.edu.in',
   links: {
     github: 'https://github.com/sanath-2512',
     linkedin: 'https://www.linkedin.com/in/sanath-waraikar-4ba35b308/',
-    resume: '/resume-sanath-waraikar.pdf',
+    // The PDF that was in /public dates from May 2026 and printed the phone
+    // number and Class X/XII scores, so it was removed. See AUDIT.md C11.
+    resume: todo('Add the Sept 2026 résumé PDF (without phone number) to /public and set this path') as Maybe<string>,
   },
+  availability: todo('Availability for roles or internships — not on the résumé') as Maybe<string>,
+  location: todo('Location / time zone — enables local time in the hero and BASED in About') as Maybe<{
+    label: string
+    timeZone: string
+  }>,
 }
 
 /* ------------------------------------------------------------------ */
-/* About                                                              */
+/* Navigation                                                         */
 /* ------------------------------------------------------------------ */
 
-export interface AboutStatement {
+export interface SectionMeta {
+  id: string
   index: string
-  headline: string
-  detail: string
+  label: string
+  /** Target uCalibration for the field when this section is centred. */
+  cal: number
+  calEnd?: number
 }
 
-export const about: AboutStatement[] = [
-  {
-    index: '01',
-    headline: 'I turn ideas into working products.',
-    detail: 'Shipped, deployed, and used — not demos that only run on my machine.',
+/** Page order. Indices are printed as §0N and [0N/08]. */
+export const sections: SectionMeta[] = [
+  { id: 'top', index: '01', label: 'Overview', cal: 0 },
+  { id: 'about', index: '02', label: 'About', cal: 0.2 },
+  { id: 'experience', index: '03', label: 'Experience', cal: 0.35 },
+  { id: 'work', index: '04', label: 'Work', cal: 0.55, calEnd: 0.8 },
+  { id: 'process', index: '05', label: 'How I build', cal: 0.84 },
+  { id: 'stack', index: '06', label: 'Stack', cal: 0.9 },
+  { id: 'signals', index: '07', label: 'Signals', cal: 0.95 },
+  { id: 'contact', index: '08', label: 'Contact', cal: 1 },
+]
+
+export const navItems = [
+  { id: 'about', label: 'About' },
+  { id: 'experience', label: 'Experience' },
+  { id: 'work', label: 'Work' },
+  { id: 'stack', label: 'Stack' },
+  { id: 'contact', label: 'Contact' },
+]
+
+/* ------------------------------------------------------------------ */
+/* §02 About                                                          */
+/* ------------------------------------------------------------------ */
+
+export type Segment = string | { term: string; tag: 'TOOL' | 'SYSTEM' | 'ORG' | 'METRIC' }
+
+export const about = {
+  title: 'Reading me',
+  /** Sentences are split into words for the scrub; terms get a DETECT box. */
+  statement: [
+    "I'm a B.Tech (Artificial Intelligence) student at Newton School of Technology, Rishihood University.",
+    [
+      'I build Python backends and applied ML: ',
+      { term: 'FastAPI', tag: 'TOOL' },
+      ' services and REST APIs that put ',
+      { term: 'LLMs', tag: 'TOOL' },
+      ' to work.',
+    ],
+    [
+      'That has meant ',
+      { term: 'RAG', tag: 'SYSTEM' },
+      ' on ',
+      { term: 'AWS Bedrock', tag: 'TOOL' },
+      ' during my internship, and ',
+      { term: 'LangGraph', tag: 'TOOL' },
+      ' agents in my projects.',
+    ],
+    "Right now I'm going deeper into deep learning and advanced ML.",
+  ] as Array<string | Segment[]>,
+  spec: [
+    { key: 'Focus', value: 'Backend + applied AI' as Maybe<string> },
+    { key: 'Core', value: 'Python · FastAPI · LLMs · RAG' as Maybe<string> },
+    { key: 'Now', value: 'B.Tech (AI), 2024–28 · deep learning & advanced ML' as Maybe<string> },
+    { key: 'Off-screen', value: 'Inter-college badminton & cricket' as Maybe<string> },
+    { key: 'Based', value: todo('Location — not on the résumé') as Maybe<string> },
+  ],
+  tags: ['Backend', 'AI/ML', 'LLMs', 'RAG', 'Agents', 'AWS'],
+}
+
+/* ------------------------------------------------------------------ */
+/* §03 Experience                                                     */
+/* ------------------------------------------------------------------ */
+
+export const experience = {
+  org: 'Fusion Cards',
+  role: 'AI Software Engineer Intern',
+  period: 'Jun 2026 – Aug 2026',
+  start: { month: 'Jun', year: 2026 },
+  end: { month: 'Aug', year: 2026 },
+  /** June, July, August — used by the tenure dimension line. */
+  months: 3,
+  location: 'Remote',
+  stack: ['Python', 'AWS Bedrock', 'Amazon S3', 'OpenSearch', 'RAG', 'LLMs', 'Prompt Engineering'],
+  /** Team system: "contributed to" / "worked on", never "built". */
+  statements: [
+    ['Contributed to enterprise AI document-processing pipelines on AWS Bedrock, Amazon S3, and OpenSearch.'],
+    [
+      'Worked on a RAG knowledge-retrieval system for credit-card documents across ',
+      { metric: '18+ banks', source: 'fusion' as SourceKey },
+      '.',
+    ],
+    ['Improved chunking strategies for shared bank-wide documents: MITC, T&Cs, and fee schedules.'],
+    ['Analyzed production data pipelines and proposed architecture changes for the scraper, extractor, and chunking workflows.'],
+  ] as Array<Array<string | { metric: string; source: SourceKey }>>,
+  /** System-level only. Stage order is unconfirmed. */
+  pipeline: {
+    label: 'Simplified',
+    orderNote: todo('Confirm the exact stage order of the Fusion Cards pipeline'),
+    stages: [
+      { id: 'docs', label: 'Bank documents', note: '18+ banks' },
+      { id: 'scraper', label: 'Scraper', touched: 'proposed' },
+      { id: 'extractor', label: 'Extractor', touched: 'proposed' },
+      { id: 'chunking', label: 'Chunking', touched: 'improved' },
+      { id: 's3', label: 'S3' },
+      { id: 'index', label: 'OpenSearch index' },
+      { id: 'retrieval', label: 'Retrieval' },
+      { id: 'llm', label: 'AWS Bedrock LLM' },
+      { id: 'answer', label: 'Answer' },
+    ] as Array<{ id: string; label: string; note?: string; touched?: 'improved' | 'proposed' }>,
   },
-  {
-    index: '02',
-    headline: 'I work across AI, backend and full-stack.',
-    detail: 'Retrieval pipelines, FastAPI services, and the React front ends on top of them.',
+}
+
+export const education = {
+  degree: 'B.Tech (Artificial Intelligence)',
+  school: 'Newton School of Technology, Rishihood University',
+  period: '2024–2028',
+  cgpa: '8.283/10',
+}
+
+/* ------------------------------------------------------------------ */
+/* §04 Work                                                           */
+/* ------------------------------------------------------------------ */
+
+export interface ProjectLinks {
+  github: Maybe<string>
+  demo: Maybe<string>
+}
+
+export const worthyApply = {
+  id: 'worthyapply',
+  no: '01',
+  name: 'WorthyApply',
+  domain: 'Resume–job fit',
+  year: 'Sept 2026',
+  oneLiner:
+    'An AI resume–job fit analyzer that tailors your resume to a job description using only your verified experience.',
+  problem:
+    'AI resume tailoring invents experience. A model asked to "fit" a resume to a job adds the skills, numbers and seniority the posting wants, whether or not the candidate has them.',
+  forWhom: 'Candidates tailoring one resume to many postings.',
+  solution:
+    'Score fit per requirement against evidence in the resume, compute the score in Python, and rewrite bullets as a small patch that a deterministic fact-check audits before anything is shown.',
+  challenge:
+    'Keeping every generated claim traceable to the source resume, while five LLM providers fail, rate-limit or time out underneath.',
+  outcome:
+    'A fact-check layer that removes fabricated claims and restores the original wording, automatic failover across 5 providers, and results streamed over SSE.',
+  stack: ['Python', 'FastAPI', 'Pydantic', 'LangChain', 'Pytest', 'Next.js', 'TypeScript', 'Render', 'Vercel'],
+  deployLine: 'FastAPI + REST + SSE on Render · Next.js + TypeScript on Vercel',
+  links: {
+    github: WA_REPO,
+    demo: 'https://worthyapply-sigma.vercel.app/',
+  } as ProjectLinks,
+  metrics: {
+    providers: { value: 5, label: 'LLM providers', source: 'waRouter' as SourceKey },
+    tests: { value: 49, label: 'pytest tests', source: 'waTests' as SourceKey },
   },
-  {
-    index: '03',
-    headline: 'I have built practical AI systems, and contributed to enterprise AI work in production.',
-    detail: 'WorthyApply and AgriMind on my own; document-processing pipelines during my internship at Fusion Cards.',
+  /** Names follow backend/pipeline.py, resume_tailor.py, grounding.py, app.py. */
+  pipeline: [
+    {
+      id: 'input',
+      label: 'Resume + JD',
+      does: 'A resume PDF and a pasted job description enter the pipeline.',
+      decision: 'The PDF is reduced to plain text first. That text, not the model, is what every later check reads.',
+      code: 'pipeline.extract_resume_text_from_bytes',
+    },
+    {
+      id: 'analysis',
+      label: 'Combined analysis',
+      does: 'One structured call runs job analysis, match analysis and optimisation, and returns one typed object.',
+      decision: 'One generation keeps the three phases consistent and drops the latency and fragility of chaining three calls.',
+      code: 'pipeline.run_combined_analysis',
+    },
+    {
+      id: 'scoring',
+      label: 'Fit scoring',
+      does: 'The model labels each requirement matched, partial, missing or cannot_verify. Python weights them into a 0–100 score.',
+      decision: 'The model never writes the number. A claimed match on a tool the resume never names is overruled to missing.',
+      code: 'pipeline.compute_match_score · skills.py',
+    },
+    {
+      id: 'tailoring',
+      label: 'Tailoring',
+      does: 'Rewrites existing bullets in the job’s language as a small patch, never a regenerated document.',
+      decision: 'Every original bullet must survive with its facts, or it is put back.',
+      code: 'resume_tailor.finalize_tailoring',
+    },
+    {
+      id: 'factcheck',
+      label: 'Fact-check',
+      does: 'Each rewritten bullet, the summary and the title are split into claims and checked against the entry they rewrite.',
+      decision: 'Hard claims (numbers, scale, outcomes, ownership, seniority) are removed and the original restored. Soft ones stay, flagged for review.',
+      code: 'grounding.unsupported_claims',
+    },
+    {
+      id: 'stream',
+      label: 'Streamed result',
+      does: 'Progress and tokens stream to the browser as server-sent events.',
+      decision: 'A long structured call shows its work instead of a blank spinner.',
+      code: 'POST /api/analyze/stream',
+    },
+  ],
+  /** Real case from backend/tests/test_grounding.py::test_claim_checks. */
+  factCheck: {
+    source: 'Assisted in building an AI document Q&A system using AWS Bedrock.',
+    generated: [
+      { text: 'Led', flag: 'ownership' },
+      { text: ' a ' },
+      { text: 'production', flag: 'scale' },
+      { text: ' ' },
+      { text: 'RAG', flag: 'unlicensed term' },
+      { text: ' platform for ' },
+      { text: '1M+', flag: 'number' },
+      { text: ' documents that ' },
+      { text: 'reduced latency by 40%', flag: 'outcome' },
+      { text: '.' },
+    ] as Array<{ text: string; flag?: string }>,
+    test: 'test_grounding.py::test_claim_checks',
+    source_key: 'waGrounding' as SourceKey,
   },
+  /** backend/llm_router/config.py — priority 1 is tried first. */
+  providers: [
+    { name: 'Groq', timeout: 25 },
+    { name: 'Cohere', timeout: 45 },
+    { name: 'Mistral', timeout: 35 },
+    { name: 'OpenRouter', timeout: 35 },
+    { name: 'Gemini', timeout: 30 },
+  ],
+  /** What the 49 tests cover, grouped by file. Names are from the repo. */
+  tests: [
+    {
+      file: 'test_grounding.py',
+      count: 26,
+      covers: 'Skill evidence, the claim fact-check, tailoring finalisation, OR-groups / years / degree checks, import fidelity',
+      examples: ['test_child_proves_parent_not_reverse', 'test_claim_checks', 'test_finalize_keeps_soft_claims_with_alert_and_removes_hard_ones'],
+    },
+    {
+      file: 'test_llm_router.py',
+      count: 10,
+      covers: 'Failover, cooldowns, circuit breaker, recovery, invalid structured output',
+      examples: ['test_2_groq_timeout_then_gemini', 'test_4_repeated_failures_open_circuit_then_skip', 'test_7_all_providers_fail_controlled_error'],
+    },
+    {
+      file: 'test_analysis_quality.py',
+      count: 8,
+      covers: 'Deterministic, priority-weighted scoring and recommendation logic',
+      examples: ['test_postprocess_recomputes_score_over_llm_value', 'test_cannot_verify_never_full_credit'],
+    },
+    {
+      file: 'test_combined_analysis.py',
+      count: 4,
+      covers: 'The one-call analysis path under provider timeout and invalid output',
+      examples: ['test_provider_timeout_triggers_fallback', 'test_invalid_output_triggers_fallback'],
+    },
+    {
+      file: 'test_timeout_no_wait.py',
+      count: 1,
+      covers: 'A hung provider does not block the request',
+      examples: ['test_hung_provider_does_not_block_request'],
+    },
+  ],
+  /** Confirmed by the repo, not on the résumé. Shown only in the case study. */
+  confirmedExtras: {
+    deterministicScoring: true,
+    benchmarkHarness: 'backend/tests/benchmark_analyze.py · benchmark_grounding.py',
+    adversarialTesting: 'benchmark_grounding.py runs fixed adversarial model outputs',
+    resumeBuilder: '/builder',
+  },
+  latency: todo(
+    'Latency: your note says 16.07 s → 5.89 s (−63.3%); the repo benchmark says 12.5 s → 6.2 s (−50.4%, n = 30). Pick one before it is shown.',
+  ),
+  lessons: [
+    todo('Lesson 1 (draft): the fact-check had to be deterministic — a second model asked "is this true?" fails the same way the first one did.'),
+    todo('Lesson 2 (draft): failover is a product feature, not plumbing; the slowest reliable provider still beats an error page.'),
+    todo('Lesson 3 (draft): the score only became trustworthy once the model stopped producing it.'),
+  ],
+}
+
+export const agriMind = {
+  id: 'agrimind',
+  no: '02',
+  name: 'AgriMind',
+  domain: 'Farm advisory',
+  year: 'Mar 2026',
+  oneLiner: 'An agentic farm-advisory system that combines crop-yield prediction with LLM retrieval.',
+  problem:
+    'Farm advice needs both numbers and knowledge: a yield estimate for this farm, and the agronomy that explains what to do about it.',
+  solution:
+    'A LangGraph agent carries one shared state through four steps: predict yield from structured farm data, retrieve agronomy passages, reason over both, and write a structured report.',
+  challenge:
+    'Keeping the answer consistent across a structured model and unstructured retrieval, and checking outputs for relevance and reliability.',
+  outcome: 'A full pipeline: FastAPI backend on Render, React frontend.',
+  stack: ['Python', 'LangGraph', 'FastAPI', 'ChromaDB', 'scikit-learn', 'React', 'Render'],
+  links: {
+    github: AGRI_REPO,
+    demo: 'https://agrimind-five.vercel.app/',
+  } as ProjectLinks,
+  githubNote: todo('Confirm the canonical AgriMind repo (Agrim-2007/AgriMind vs sanath-2512/cropyeild_ml)'),
+  /** Real graph: START → predict → retrieve → reason → report → END. */
+  graph: [
+    { id: 'predict', label: 'predict', stream: 'structured', detail: 'scikit-learn yield model on the farm inputs' },
+    { id: 'retrieve', label: 'retrieve', stream: 'unstructured', detail: 'ChromaDB agronomy passages' },
+    { id: 'reason', label: 'reason', stream: 'merge', detail: 'LLM reasons over prediction + passages' },
+    { id: 'report', label: 'report', stream: 'out', detail: 'Structured advisory report' },
+  ] as Array<{ id: string; label: string; stream: 'structured' | 'unstructured' | 'merge' | 'out'; detail: string }>,
+  trace: ['01 PREDICT', '02 RETRIEVE', '03 REASON', '04 REPORT'],
+}
+
+export const archive = [
   {
-    index: '04',
-    headline: 'I care about engineering decisions, not just calling APIs.',
-    detail: 'Where the model call sits, what it returns, and what the system does with it once it has.',
+    id: 'eduai',
+    no: '03',
+    name: 'EduAI',
+    domain: 'Learning platform',
+    year: 'Nov 2025',
+    oneLiner: 'A learning platform that generates explanations and quizzes behind a JWT-authenticated, role-based REST API.',
+    stack: ['React', 'REST APIs', 'JWT', 'AI APIs'],
+    links: {
+      github: 'https://github.com/sanath-2512/EduAI.',
+      demo: 'https://edu-ai-rho-hazel.vercel.app/',
+    } as ProjectLinks,
   },
 ]
 
 /* ------------------------------------------------------------------ */
-/* Stack                                                              */
+/* §05 How I build                                                    */
 /* ------------------------------------------------------------------ */
 
-export interface Tech {
-  name: string
-  /** One line on where this was actually used. Omitted when nothing supports it. */
-  usage?: string
-}
+export const processStages = [
+  'Problem',
+  'Research',
+  'Architecture',
+  'Implementation',
+  'Evaluation',
+  'Optimization',
+  'Deployment',
+] as const
+export type ProcessStage = (typeof processStages)[number]
 
-export interface StackGroup {
-  id: string
-  label: string
-  items: Tech[]
-}
-
-export const stack: StackGroup[] = [
+/** Stages with no real content are omitted, not padded. */
+export const processTabs: Array<{ id: string; label: string; steps: Partial<Record<ProcessStage, string>> }> = [
   {
-    id: 'ai',
-    label: 'AI / ML',
-    items: [
-      { name: 'LLMs', usage: 'Structured analysis behind WorthyApply job–resume matching.' },
-      { name: 'Generative AI' },
-      { name: 'RAG', usage: 'Knowledge retrieval over credit-card documents across 18+ banks.' },
-      { name: 'LangGraph', usage: 'Orchestrates the multi-step agent flow in AgriMind.' },
-      { name: 'Vector Embeddings', usage: 'Retrieval index for the internship document pipeline.' },
-      { name: 'Machine Learning', usage: 'Crop-yield prediction in AgriMind.' },
+    id: 'worthyapply',
+    label: 'WorthyApply',
+    steps: {
+      Problem: 'Tailoring models fabricate claims.',
+      Architecture: 'One structured analysis call, SSE streaming, failover across 5 providers.',
+      Implementation: 'Deterministic scoring in Python; tailoring as a patch; claim-level fact-check.',
+      Evaluation: '49 pytest tests, plus an offline adversarial benchmark for the fact-check.',
+      Deployment: 'FastAPI on Render, Next.js on Vercel.',
+    },
+  },
+  {
+    id: 'agrimind',
+    label: 'AgriMind',
+    steps: {
+      Problem: 'Advice needs numbers and knowledge.',
+      Architecture: 'LangGraph state carries a yield prediction and retrieved passages into one reasoning step.',
+      Evaluation: 'Response consistency across structured and unstructured sources; relevance and reliability.',
+      Deployment: 'FastAPI on Render, React frontend.',
+    },
+  },
+  {
+    id: 'fusion',
+    label: 'Fusion Cards',
+    steps: {
+      Problem: 'Retrieval across shared documents from 18+ banks.',
+      Research: 'Analyzed the production data pipelines.',
+      Architecture: 'Proposed changes to the scraper, extractor and chunking workflows.',
+      Implementation: 'Improved chunking for MITC, T&Cs and fee schedules.',
+    },
+  },
+]
+
+/* ------------------------------------------------------------------ */
+/* §06 Stack                                                          */
+/* ------------------------------------------------------------------ */
+
+export type ProjectTag = 'WorthyApply' | 'AgriMind' | 'Fusion Cards' | 'This site'
+export const projectTags: ProjectTag[] = ['WorthyApply', 'AgriMind', 'Fusion Cards', 'This site']
+
+export interface Tool {
+  name: string
+  use?: string
+  projects: ProjectTag[]
+}
+
+/** Appendix A categories. Tools with no project go under "also worked with". */
+export const stack: Array<{ id: string; label: string; tools: Tool[] }> = [
+  {
+    id: 'languages',
+    label: 'Languages',
+    tools: [
+      { name: 'Python', use: 'Backends, pipelines, the fact-check', projects: ['WorthyApply', 'AgriMind', 'Fusion Cards'] },
+      { name: 'TypeScript', use: 'Typed frontends', projects: ['WorthyApply', 'This site'] },
+      { name: 'HTML/CSS', use: 'Tokens, layout, both themes', projects: ['This site'] },
+      { name: 'JavaScript', projects: [] },
+      { name: 'SQL', projects: [] },
     ],
   },
   {
     id: 'backend',
-    label: 'Backend',
-    items: [
-      { name: 'Python', usage: 'Primary language for the internship document pipelines.' },
-      { name: 'FastAPI', usage: 'Backend for WorthyApply and AgriMind.' },
-      { name: 'Node.js' },
-      { name: 'Express.js' },
-      { name: 'REST APIs', usage: 'Content, auth and progress-tracking endpoints in EduAI.' },
+    label: 'Backend & APIs',
+    tools: [
+      { name: 'FastAPI', use: 'Analysis and advisory services', projects: ['WorthyApply', 'AgriMind'] },
+      { name: 'REST APIs', use: 'Analyze, extract and tailor endpoints', projects: ['WorthyApply'] },
+      { name: 'Server-Sent Events', use: 'Streaming progress and tokens', projects: ['WorthyApply'] },
+      { name: 'Pydantic', use: 'Typed structured output', projects: ['WorthyApply'] },
+      { name: 'Pytest', use: '49 tests', projects: ['WorthyApply'] },
+      { name: 'Node.js', projects: [] },
+      { name: 'Express.js', projects: [] },
+      { name: 'Prisma ORM', projects: [] },
+    ],
+  },
+  {
+    id: 'cloud',
+    label: 'Cloud & DevOps',
+    tools: [
+      { name: 'AWS Bedrock', use: 'Model access in document pipelines', projects: ['Fusion Cards'] },
+      { name: 'Amazon S3', use: 'Document storage', projects: ['Fusion Cards'] },
+      { name: 'Render', use: 'Python backends', projects: ['WorthyApply', 'AgriMind'] },
+      { name: 'Vercel', use: 'Next.js frontend', projects: ['WorthyApply'] },
+      { name: 'Git & GitHub', projects: [] },
+    ],
+  },
+  {
+    id: 'databases',
+    label: 'Databases',
+    tools: [
+      { name: 'OpenSearch', use: 'Retrieval index', projects: ['Fusion Cards'] },
+      { name: 'ChromaDB', use: 'Agronomy knowledge store', projects: ['AgriMind'] },
+      { name: 'MySQL', projects: [] },
+      { name: 'MongoDB', projects: [] },
+    ],
+  },
+  {
+    id: 'ai',
+    label: 'AI / ML',
+    tools: [
+      { name: 'LLMs', use: 'Structured analysis, reasoning, answers', projects: ['WorthyApply', 'AgriMind', 'Fusion Cards'] },
+      { name: 'RAG', use: 'Retrieval over bank documents and agronomy', projects: ['AgriMind', 'Fusion Cards'] },
+      { name: 'LangChain', use: 'Provider adapters under the router', projects: ['WorthyApply'] },
+      { name: 'LangGraph', use: 'Multi-step agent state', projects: ['AgriMind'] },
+      { name: 'Prompt Engineering', use: 'Document-pipeline prompts', projects: ['Fusion Cards'] },
+      { name: 'scikit-learn', use: 'Crop-yield model', projects: ['AgriMind'] },
+      { name: 'Vector Embeddings', projects: [] },
+      { name: 'Hugging Face', projects: [] },
+      { name: 'Machine Learning', projects: [] },
     ],
   },
   {
     id: 'frontend',
     label: 'Frontend',
-    items: [
-      { name: 'React', usage: 'Interfaces for EduAI and AgriMind.' },
-      { name: 'JavaScript' },
-      { name: 'Tailwind CSS', usage: 'Design tokens and layout for this site.' },
-      { name: 'Three.js', usage: 'The node-and-edge scene running behind this page.' },
-      { name: 'GSAP', usage: 'Scroll choreography across this page.' },
+    tools: [
+      { name: 'React', use: 'Interfaces', projects: ['AgriMind', 'This site'] },
+      { name: 'Next.js', use: 'App frontend', projects: ['WorthyApply'] },
+      { name: 'Tailwind CSS', use: 'Utility layer over the tokens', projects: ['This site'] },
+      { name: 'Three.js', use: 'The calibration field', projects: ['This site'] },
+      { name: 'GSAP', use: 'Scroll choreography', projects: ['This site'] },
+      { name: 'Lenis', use: 'Smooth scroll', projects: ['This site'] },
+      { name: 'Vite', use: 'Build', projects: ['This site'] },
     ],
-  },
-  {
-    id: 'cloud',
-    label: 'Cloud / Infra',
-    items: [
-      { name: 'AWS', usage: 'Platform for the enterprise document-processing pipelines.' },
-      { name: 'Amazon Bedrock', usage: 'Model access in the internship document-processing pipeline.' },
-      { name: 'Amazon S3', usage: 'Document storage for the ingestion pipeline.' },
-      { name: 'OpenSearch', usage: 'Retrieval index for the bank-document RAG system.' },
-      { name: 'Git' },
-      { name: 'GitHub' },
-    ],
-  },
-  {
-    id: 'data',
-    label: 'Databases',
-    items: [{ name: 'MySQL' }],
   },
 ]
 
 /* ------------------------------------------------------------------ */
-/* Experience                                                         */
+/* §07 Signals                                                        */
 /* ------------------------------------------------------------------ */
 
-export interface Experience {
-  company: string
-  role: string
-  period: string
-  summary: string
-  work: string[]
-  tech: string[]
-  impact: { value: string; label: string }
-}
-
-export const experience: Experience = {
-  company: 'Fusion Cards',
-  role: 'AI Software Engineer Intern',
-  period: 'June 2026 — Present',
-  summary:
-    'Enterprise document processing: getting bank documents into a form a retrieval system can answer from.',
-  work: [
-    'Contributed to enterprise AI document-processing pipelines using AWS Bedrock, OpenSearch and Amazon S3.',
-    'Worked on a RAG-based knowledge retrieval system for credit-card documents across 18+ banks.',
-    'Improved document chunking strategies for shared bank-wide documents (MITC, Terms & Conditions, fee schedules).',
-    'Analyzed production data pipelines and proposed architectural improvements for scraper, extractor and chunking workflows.',
-  ],
-  tech: ['Python', 'AWS Bedrock', 'Amazon S3', 'OpenSearch', 'RAG', 'LLMs', 'Prompt Engineering'],
-  impact: { value: '18+', label: 'banks covered by the retrieval system' },
-}
-
-/* ------------------------------------------------------------------ */
-/* WorthyApply — flagship case study                                  */
-/* ------------------------------------------------------------------ */
-
-export interface PipelineStage {
-  id: string
-  label: string
-  note: string
-}
-
-export interface ArchitectureNode {
-  id: string
-  label: string
-  description: string
-}
-
-export const worthyApply = {
-  name: 'WorthyApply',
-  kind: 'AI-Powered Job Application & Resume Optimization Platform',
-  status: 'Shipped',
-  summary:
-    'Analyzes a job description against a resume, identifies requirement gaps, and generates structured recommendations to improve alignment.',
-
-  problem: {
-    title: 'Problem',
-    body: 'A job description and a resume describe the same role in different vocabulary. Working out what is genuinely missing means reading both closely, and the answer changes with every posting. Done by hand it is slow; done by a model that just returns a number, it is not repeatable.',
-  },
-  solution: {
-    title: 'Solution',
-    body: 'One pipeline reads both documents, extracts requirements and evidence as structured data, and scores the match from that structure rather than from a model opinion. The output is a gap list and a set of concrete edits — plus an ATS-friendly resume built from them.',
-  },
-
-  pipeline: [
-    { id: 'input', label: 'Resume / JD', note: 'Uploaded resume and the target job description enter the pipeline.' },
-    { id: 'extraction', label: 'Extraction', note: 'Both documents are parsed into structured fields — PDF resumes included.' },
-    { id: 'job-analysis', label: 'Job Analysis', note: 'Requirements, responsibilities and skills are pulled out of the posting.' },
-    { id: 'resume-analysis', label: 'Resume Analysis', note: 'Experience and skill evidence is pulled out of the resume.' },
-    { id: 'match', label: 'Match Analysis', note: 'Requirements are matched against evidence; unmatched requirements become gaps.' },
-    { id: 'optimization', label: 'Optimization', note: 'Gaps become structured, specific recommendations rather than generic advice.' },
-    { id: 'output', label: 'Tailored Resume', note: 'An ATS-friendly resume generated from the accepted recommendations.' },
-  ] satisfies PipelineStage[],
-
-  performance: {
-    before: { label: '3 sequential analysis calls', seconds: 16.07, bars: 3 },
-    after: { label: '1 combined analysis pipeline', seconds: 5.89, bars: 1 },
-    reduction: 63.3,
-    note: 'Average latency, measured before and after collapsing three sequential analysis calls into a single combined pipeline.',
-  },
-
-  deterministic: {
-    title: 'Deterministic scoring',
-    body: 'The final assessment is computed deterministically from structured evidence extracted by the LLM, instead of trusting an LLM-generated score.',
-    steps: [
-      { id: 'llm', label: 'LLM', note: 'Reads both documents.' },
-      { id: 'evidence', label: 'Structured evidence', note: 'Requirements and matching evidence, as data.' },
-      { id: 'score', label: 'Deterministic score', note: 'Computed from that data — same input, same result.' },
-    ],
-  },
-
-  architecture: [
-    { id: 'frontend', label: 'Frontend', description: 'Upload, review the gap list, accept recommendations, export the resume.' },
-    { id: 'fastapi', label: 'FastAPI', description: 'Request handling and orchestration for the analysis pipeline.' },
-    { id: 'pipeline', label: 'Analysis Pipeline', description: 'One combined pass over the job description and the resume.' },
-    { id: 'llm', label: 'LLM / Structured Output', description: 'The model returns structured fields, not prose or a score.' },
-    { id: 'scoring', label: 'Deterministic Scoring', description: 'The assessment is computed from that structure, so it is repeatable.' },
-    { id: 'optimization', label: 'Optimization', description: 'Gaps are turned into specific, reviewable resume edits.' },
-    { id: 'resume', label: 'Resume Output', description: 'An ATS-friendly resume generated from the accepted edits.' },
-  ] satisfies ArchitectureNode[],
-
-  features: [
-    'Resume Builder',
-    'PDF Resume Import',
-    'Resume Extraction',
-    'Job Description Analysis',
-    'Resume Analysis',
-    'Job ↔ Resume Matching',
-    'Requirement / Skill Gap Analysis',
-    'Resume Optimization',
-    'Tailor Resume workflow',
-    'ATS-friendly resume generation',
-    'Structured AI analysis',
-  ],
-
-  stack: ['FastAPI', 'Python', 'LLMs', 'Structured Output'],
-
-  // TODO: add WorthyApply GitHub URL
-  github: null as ExternalLink,
-  // TODO: add WorthyApply live demo URL
-  demo: null as ExternalLink,
-}
-
-/* ------------------------------------------------------------------ */
-/* Other projects                                                     */
-/* ------------------------------------------------------------------ */
-
-export interface Project {
-  id: string
-  name: string
-  kind: string
-  description: string
-  stack: string[]
-  highlights: string[]
-  github: ExternalLink
-  demo: ExternalLink
-}
-
-export const projects: Project[] = [
-  {
-    id: 'agrimind',
-    name: 'AgriMind',
-    kind: 'Agentic Farm Advisory System',
-    description:
-      'An agentic RAG system that answers farm questions from retrieved agronomic knowledge and a crop-yield prediction model.',
-    stack: ['LangGraph', 'RAG', 'Machine Learning', 'FastAPI', 'React', 'Python'],
-    highlights: [
-      'LangGraph orchestrates retrieval, relevance evaluation and answering as distinct steps.',
-      'Retrieved passages are evaluated for relevance before they reach the answer.',
-      'A crop-yield prediction model runs alongside knowledge retrieval, not instead of it.',
-    ],
-    // TODO: verify AgriMind GitHub URL — the resume PDF in /public points at
-    // github.com/Agrim-2007/GENAI-capstone instead of this repo.
-    github: 'https://github.com/sanath-2512/cropyeild_ml',
-    demo: 'https://agrimind-five.vercel.app/',
-  },
-  {
-    id: 'eduai',
-    name: 'EduAI',
-    kind: 'AI-Powered Learning Platform',
-    description:
-      'A learning platform that generates explanations and quizzes, behind an authenticated, role-aware API.',
-    stack: ['React', 'REST APIs', 'LLMs'],
-    highlights: [
-      'AI-generated explanations and automated quiz generation.',
-      'JWT authentication with role-based access control.',
-      'REST APIs for content, auth and progress tracking.',
-    ],
-    // TODO: verify the EduAI GitHub URL — the trailing dot comes from the
-    // previous site and the resume PDF, and may not resolve.
-    github: 'https://github.com/sanath-2512/EduAI.',
-    demo: 'https://edu-ai-rho-hazel.vercel.app',
-  },
-]
-
-/* ------------------------------------------------------------------ */
-/* Agent flow illustration — AgriMind                                 */
-/* ------------------------------------------------------------------ */
-
-export const agentFlow = [
-  { id: 'retrieve', label: 'Retrieve' },
-  { id: 'evaluate', label: 'Evaluate relevance' },
-  { id: 'answer', label: 'Answer / predict' },
-]
-
-/* ------------------------------------------------------------------ */
-/* How I build                                                        */
-/* ------------------------------------------------------------------ */
-
-export interface BuildStep {
-  index: string
-  title: string
-  body: string
-  example: string
-}
-
-export const howIBuild: BuildStep[] = [
-  {
-    index: '01',
-    title: 'Understand',
-    body: 'Read the system that already exists before proposing anything for it.',
-    example:
-      'Analyzed production data pipelines at Fusion Cards and proposed architectural improvements for the scraper, extractor and chunking workflows.',
-  },
-  {
-    index: '02',
-    title: 'Design',
-    body: 'Decide where the model sits, and what the system — not the model — is responsible for.',
-    example:
-      'WorthyApply computes its final assessment deterministically from structured evidence, instead of trusting an LLM-generated score.',
-  },
-  {
-    index: '03',
-    title: 'Build',
-    body: 'Get it working end to end, then fix the part that actually limits quality.',
-    example:
-      'Improved document chunking strategies for shared bank-wide documents — MITC, Terms & Conditions, fee schedules — so retrieval had the right units to work with.',
-  },
-  {
-    index: '04',
-    title: 'Measure',
-    body: 'A number you can reproduce, taken before you change anything.',
-    example:
-      'WorthyApply started at 16.07s average latency across three sequential analysis calls.',
-  },
-  {
-    index: '05',
-    title: 'Improve',
-    body: 'Change one thing, measure again, keep the change if the number moved.',
-    example:
-      'Combining those calls into one analysis pipeline brought average latency to 5.89s — a 63.3% reduction.',
-  },
-]
-
-/* ------------------------------------------------------------------ */
-/* "Why?" notes — rendered inside the section they belong to          */
-/* ------------------------------------------------------------------ */
-
-export interface WhyNote {
-  question: string
-  answer: string
-  context: string
-}
-
-export const whyNotes: Record<'rag' | 'deterministic' | 'combined' | 'langgraph', WhyNote> = {
-  rag: {
-    question: 'Why RAG?',
-    answer: 'Ground responses in relevant documents.',
-    context: 'Fusion Cards · AgriMind',
-  },
-  deterministic: {
-    question: 'Why deterministic scoring?',
-    answer: 'Reduce variability when scoring structured requirements.',
-    context: 'WorthyApply',
-  },
-  combined: {
-    question: 'Why combine analysis calls?',
-    answer: 'Fewer model calls, lower latency — 16.07s → 5.89s.',
-    context: 'WorthyApply',
-  },
-  langgraph: {
-    question: 'Why LangGraph?',
-    answer: 'Orchestrating multi-step agentic workflows.',
-    context: 'AgriMind',
-  },
-}
-
-/* ------------------------------------------------------------------ */
-/* Metrics strip                                                      */
-/* ------------------------------------------------------------------ */
-
-export interface Metric {
-  id: string
-  value: number
-  decimals: number
-  prefix?: string
-  suffix: string
-  label: string
-}
-
-export const metrics: Metric[] = [
-  { id: 'reduction', value: 63.3, decimals: 1, suffix: '%', label: 'lower average latency, WorthyApply' },
-  { id: 'latency', value: 5.89, decimals: 2, suffix: 's', label: 'average analysis latency, down from 16.07s' },
-  { id: 'banks', value: 18, decimals: 0, suffix: '+', label: 'banks covered by the retrieval system' },
-]
-
-/* ------------------------------------------------------------------ */
-/* Achievements                                                       */
-/* ------------------------------------------------------------------ */
-
-export interface Achievement {
-  title: string
+export const signals: Array<{
+  year: Maybe<string>
+  what: string
   detail: string
-  meta: string
-  links?: { label: string; href: string }[]
-}
-
-export const achievements: Achievement[] = [
+  tag: 'ORG' | 'METRIC' | 'SYSTEM'
+  links?: Array<{ label: string; href: string }>
+  note?: Todo
+}> = [
+  { year: '2025', what: 'GirlScript Summer of Code', detail: 'Open-source contributor', tag: 'ORG', note: todo('Links to GSSoC 2025 contributions') },
+  { year: '2026', what: 'GirlScript Summer of Code', detail: 'Open-source contributor', tag: 'ORG', note: todo('Links to GSSoC 2026 contributions') },
+  { year: '2026', what: 'Thapar Institute Tech Fest', detail: 'Built two working projects under time constraints', tag: 'ORG' },
+  { year: todo('Buildspace hackathon year'), what: 'Buildspace hackathon', detail: 'Top 7 finish', tag: 'METRIC' },
   {
-    title: 'Top 7',
-    detail: 'Buildspace Hackathon',
-    meta: 'Thapar Institute Tech Fest · 2026',
-  },
-  {
-    title: 'Competitive Programming',
+    year: 'ongoing',
+    what: 'Competitive programming',
     detail: 'LeetCode · CodeChef · Codeforces',
-    meta: 'Data structures and algorithms',
+    tag: 'SYSTEM',
+    // Confirmed by the hyperlinks in the repo's own résumé PDF (AUDIT.md §5).
     links: [
       { label: 'LeetCode', href: 'https://leetcode.com/u/LvqtSP4dgr/' },
       { label: 'CodeChef', href: 'https://www.codechef.com/users/colony_dice_69' },
       { label: 'Codeforces', href: 'https://codeforces.com/profile/sanath25' },
     ],
   },
-  {
-    title: 'Sports',
-    detail: 'Badminton · Cricket',
-    meta: 'Inter-college level',
-  },
 ]
 
 /* ------------------------------------------------------------------ */
-/* Navigation                                                         */
+/* §08 Contact                                                        */
 /* ------------------------------------------------------------------ */
 
-export interface NavItem {
-  id: string
-  label: string
+export const contact = {
+  headline: "Let's build something useful.",
 }
 
-/** Ordered to match scroll order so the active indicator never moves backwards. */
-export const navItems: NavItem[] = [
-  { id: 'about', label: 'About' },
-  { id: 'stack', label: 'Stack' },
-  { id: 'experience', label: 'Experience' },
-  { id: 'projects', label: 'Projects' },
-  { id: 'contact', label: 'Contact' },
-]
+/* ------------------------------------------------------------------ */
+/* Build metadata (injected by vite.config.ts)                         */
+/* ------------------------------------------------------------------ */
 
-export const contactPrompt = 'Have something worth building?'
+export const build = {
+  sha: __BUILD_SHA__,
+  date: __BUILD_DATE__,
+}
 
 export const siteMeta = {
-  title: `${profile.name} — ${profile.role}`,
-  description: `${profile.name} builds AI systems, LLM and RAG applications, full-stack products and backend services.`,
-  year: new Date().getFullYear(),
+  title: `${profile.name} — Backend + AI engineer`,
+  description:
+    'Sanath Waraikar builds LLM systems that stay grounded: RAG over real documents, agentic pipelines, and resilient FastAPI backends.',
 }
