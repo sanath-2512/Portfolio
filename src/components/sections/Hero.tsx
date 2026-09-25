@@ -139,7 +139,7 @@ export default function Hero() {
       const text =
         input.cellC >= 0
           ? `Cell C${String(input.cellC).padStart(3, '0')} · R${String(input.cellR).padStart(3, '0')}`
-          : 'Cell — · —'
+          : 'Move the pointer to measure'
       if (text !== lastCell && cell.current) {
         lastCell = text
         cell.current.textContent = text
@@ -231,7 +231,7 @@ export default function Hero() {
 
       <div className="shell mt-10 flex flex-wrap items-end justify-between gap-x-6 gap-y-1 md:mt-14">
         <span ref={cell} className="mono mono-sm hidden text-measure [@media(pointer:fine)]:inline" aria-hidden="true">
-          Cell — · —
+          Move the pointer to measure
         </span>
         <Known value={profile.location} label="Location / local time">{(loc) => <span className="mono mono-sm text-ink-muted">{loc.label}</span>}</Known>
         <span className="mono mono-sm text-ink-muted">

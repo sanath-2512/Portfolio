@@ -312,7 +312,10 @@ export function createField(host: HTMLElement, beam: HTMLElement | null): FieldH
       contactScanned = false
     }
 
-    const opacity = lerp(1, 0.3, current.dim)
+    // Between the hero and the contact grid the field steps back behind text;
+    // it's full strength only where it is the subject.
+    const quiet = smooth(0.06, 0.18, current.cal) * (1 - smooth(0.9, 0.99, current.cal))
+    const opacity = lerp(1, 0.5, quiet) * lerp(1, 0.55, current.dim)
     uniforms.uOpacity.value = opacity
     if (opacity < 0.01) return
 

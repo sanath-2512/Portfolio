@@ -149,7 +149,7 @@ void main() {
 
   /* ---- the cell itself ---- */
 
-  float fid = step(aCell.z, 0.011);
+  float fid = step(aCell.z, 0.006);
   vFid = fid;
   vec2 size = vec2(uCellSize);
   size *= mix(1.0, 2.8 - uCal * 1.1, fid);
@@ -204,7 +204,7 @@ void main() {
   float hot = max(vLens, vScan);
   vec3 colour = mix(uInk, uMeasure, clamp(hot * 1.4, 0.0, 1.0));
   float alpha = mix(uAlpha, 0.95, hot);
-  alpha = mix(alpha, max(alpha, 0.55), vFid);
+  alpha = mix(alpha, max(alpha, 0.42), vFid);
 
   gl_FragColor = vec4(colour, a * alpha * uOpacity);
 }

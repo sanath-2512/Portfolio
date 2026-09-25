@@ -32,6 +32,8 @@ const errors = []
 page.on('pageerror', (e) => errors.push(e.message))
 page.on('console', (m) => m.type() === 'error' && errors.push(m.text()))
 await page.goto(url, { waitUntil: 'networkidle' })
+// Sections below the hero mount in idle slices; wait for the last one.
+await page.waitForSelector('#contact', { timeout: 15000 })
 await page.waitForTimeout(800)
 for (const spec of specs) {
   const [name, sel, k = '0'] = spec.split(':')

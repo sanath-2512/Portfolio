@@ -106,10 +106,10 @@ export default function About() {
       <div ref={pinned} className="shell mt-12 lg:mt-16">
         <div className="grid12 gap-y-12">
           <div className="col-span-4 md:col-span-12 lg:col-span-8">
-            <StretchHeading id="about-title" className="text-ink-muted">
+            <StretchHeading id="about-title">
               {about.title}
             </StretchHeading>
-            <p className="mt-10 text-[clamp(1.6rem,3.1vw,3rem)] font-medium leading-[1.32] tracking-[-0.01em] lg:leading-[1.22]">
+            <p className="mt-10 text-[clamp(1.6rem,3.1vw,3rem)] font-medium leading-[1.55] tracking-[-0.01em] lg:leading-[1.3]">
               {about.statement.map((parts, i) => (
                 <span key={i} className="about-sentence">
                   <Sentence parts={parts} />

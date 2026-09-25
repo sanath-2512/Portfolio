@@ -176,3 +176,12 @@ See AUDIT §5.
 - **Mobile LCP:** 2.4–2.5 s simulated, right at the 2.5 s target. The next step would be subsetting Archivo; its Latin `wdth` file is 88 KB.
 - **Deep links:** they land 0–64 px below the exact nav offset while late layout (pins, images) settles. The heading is always in view.
 - **Stack filter:** rows filtered out dim to 25% opacity. It's a deliberate de-emphasis state that falls below text contrast while a filter is active.
+
+## Refinement pass
+
+- The field steps back to half strength behind the reading sections (About → Signals) and returns at full strength for the hero and the contact grid. Fiducial markers are fewer and softer, so they no longer sit on top of text.
+- About: the heading is in full ink, and more line spacing on mobile keeps the DETECT tags clear of the line above.
+- Hero: the idle readout now says "Move the pointer to measure" instead of a placeholder-looking `Cell — · —`.
+- **Link previews:** `public/og.png` (1200×630, rendered by `scripts/og/render.mjs` in the site's own fonts), Open Graph and Twitter card tags, a canonical URL and `Person` JSON-LD. The URLs are absolute on Vercel, using `VERCEL_PROJECT_PRODUCTION_URL`.
+- `scripts/qa/sections.mjs` waits for the staged sections before capturing.
+- Re-verified: lint clean; 78 keyboard stops; the no-WebGL fallback; routes; no overflow at 6 widths × 2 themes. Lighthouse: mobile 96, desktop 100; accessibility, best practices and SEO all 100.
