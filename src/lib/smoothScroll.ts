@@ -43,15 +43,15 @@ export function initSmoothScroll(): () => void {
   }
 }
 
-/** Every in-page anchor goes through here. */
-export function scrollToId(id: string) {
+/** Every in-page anchor goes through here. `immediate` jumps (route changes). */
+export function scrollToId(id: string, options: { immediate?: boolean } = {}) {
   const target = document.getElementById(id)
   if (!target) return
   if (instance) {
-    instance.scrollTo(target, { offset: NAV_OFFSET })
+    instance.scrollTo(target, { offset: NAV_OFFSET, immediate: options.immediate, force: true })
   } else {
     const top = target.getBoundingClientRect().top + window.scrollY + NAV_OFFSET
-    window.scrollTo({ top, behavior: prefersReducedMotion() ? 'auto' : 'smooth' })
+    window.scrollTo({ top, behavior: options.immediate || prefersReducedMotion() ? 'auto' : 'smooth' })
   }
   // Move focus for keyboard and screen-reader users without a second jump.
   if (!target.hasAttribute('tabindex')) target.setAttribute('tabindex', '-1')

@@ -4,6 +4,7 @@ import { useActiveSection } from '@/hooks/useActiveSection'
 import { gsap } from '@/lib/gsap'
 import { DUR, EASE, STAGGER, scan } from '@/lib/motion'
 import { pauseSmoothScroll, resumeSmoothScroll, scrollToId, scrollToTop } from '@/lib/smoothScroll'
+import { navigate } from '@/lib/router'
 import { cx, prefersReducedMotion } from '@/lib/utils'
 import { ArucoMark } from '@/components/global/ArucoMark'
 import { ThemeToggle } from '@/components/global/ThemeToggle'
@@ -46,6 +47,11 @@ export function SiteNav() {
 
   const go = useCallback((id: string) => {
     setOpen(false)
+    // Off the home page (the case study), go home first; App scrolls to the hash.
+    if (window.location.pathname !== '/') {
+      navigate(`/#${id}`)
+      return
+    }
     // Let the menu release the scroll lock before handing off to Lenis.
     requestAnimationFrame(() => scrollToId(id))
   }, [])
@@ -72,7 +78,8 @@ export function SiteNav() {
               onClick={(e) => {
                 e.preventDefault()
                 setOpen(false)
-                scrollToTop()
+                if (window.location.pathname !== '/') navigate('/')
+                else scrollToTop()
               }}
               className="stretch-host tap -ml-1 inline-flex items-center gap-3 pl-1"
               aria-label={`${profile.name}, back to top`}

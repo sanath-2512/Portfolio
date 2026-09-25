@@ -318,7 +318,8 @@
   .stretch-host:focus-visible .stretch,
   .stretch:hover,
   .stretch:focus-visible,
-  [aria-current='true'] .stretch {
+  [aria-current='true'] .stretch,
+  [aria-selected='true'] .stretch {
     --wdth: var(--wdth-to, 125);
   }
 
@@ -674,4 +675,89 @@
 
 .cursor-cross:not([data-mode='default']) .cursor-readout {
   opacity: 0;
+}
+
+/* ================================================================== */
+/* WorthyApply fact-check: struck claims                               */
+/* ================================================================== */
+
+.fc-strike {
+  background-image: linear-gradient(var(--signal), var(--signal));
+  background-repeat: no-repeat;
+  background-position: 0 58%;
+  background-size: 0% 2px;
+  transition:
+    background-size 0.4s var(--ease-out),
+    color 0.4s var(--ease-out);
+}
+
+.is-struck .fc-strike {
+  background-size: 100% 2px;
+  color: var(--ink-muted);
+}
+
+/* EduAI sequence diagram: arrows draw from the sender */
+.seq-msg .seq-arrow {
+  transform: scaleX(0);
+  transition: transform 0.7s var(--ease-out);
+}
+.seq-msg.is-drawn .seq-arrow {
+  transform: scaleX(1);
+}
+.seq-msg > p {
+  opacity: 0;
+  transition: opacity 0.4s var(--ease-out) 0.25s;
+}
+.seq-msg.is-drawn > p {
+  opacity: 1;
+}
+
+/* AgriMind graph */
+.ag-write {
+  stroke: var(--line);
+  stroke-width: 1;
+}
+.ag-read {
+  fill: none;
+  stroke: var(--line);
+  stroke-width: 1;
+  stroke-dasharray: 3 3;
+  transition: stroke 0.3s var(--ease-out);
+}
+.ag-read.is-on {
+  stroke: var(--measure);
+}
+.ag-slot {
+  transition:
+    color 0.3s var(--ease-out),
+    border-color 0.3s var(--ease-out);
+}
+.ag-slot.is-on {
+  color: var(--measure);
+  border-color: var(--measure);
+  border-style: solid;
+}
+.ag-node > span:first-child {
+  transition: background-color 0.3s var(--ease-out);
+}
+.ag-node.is-on > span:first-child {
+  background: var(--ink);
+}
+.ag-node.is-on > span.border-signal {
+  background: var(--signal);
+}
+.ag-trace li {
+  opacity: 0.28;
+  transition: opacity 0.3s var(--ease-out);
+}
+.ag-trace li.is-on {
+  opacity: 1;
+}
+
+/* Project screenshots sit in the palette: monochrome specimens. */
+.specimen {
+  filter: grayscale(1) contrast(1.04);
+}
+[data-theme='darkroom'] .specimen {
+  opacity: 0.9;
 }

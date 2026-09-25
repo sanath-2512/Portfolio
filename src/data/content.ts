@@ -427,7 +427,7 @@ export const agriMind = {
   problem:
     'Farm advice needs both numbers and knowledge: a yield estimate for this farm, and the agronomy that explains what to do about it.',
   solution:
-    'A LangGraph agent carries one shared state through four steps: predict yield from structured farm data, retrieve agronomy passages, reason over both, and write a structured report.',
+    'A LangGraph agent carries one shared state through four steps: predict yield from structured farm data, retrieve agronomy passages for that prediction, reason over both, and write a structured report.',
   challenge:
     'Keeping the answer consistent across a structured model and unstructured retrieval, and checking outputs for relevance and reliability.',
   outcome: 'A full pipeline: FastAPI backend on Render, React frontend.',
@@ -437,14 +437,50 @@ export const agriMind = {
     demo: 'https://agrimind-five.vercel.app/',
   } as ProjectLinks,
   githubNote: todo('Confirm the canonical AgriMind repo (Agrim-2007/AgriMind vs sanath-2512/cropyeild_ml)'),
-  /** Real graph: START → predict → retrieve → reason → report → END. */
+  /** Real graph (src/reference_agent/graph.py): START → predict → retrieve → reason → report → END. */
   graph: [
-    { id: 'predict', label: 'predict', stream: 'structured', detail: 'scikit-learn yield model on the farm inputs' },
-    { id: 'retrieve', label: 'retrieve', stream: 'unstructured', detail: 'ChromaDB agronomy passages' },
-    { id: 'reason', label: 'reason', stream: 'merge', detail: 'LLM reasons over prediction + passages' },
-    { id: 'report', label: 'report', stream: 'out', detail: 'Structured advisory report' },
-  ] as Array<{ id: string; label: string; stream: 'structured' | 'unstructured' | 'merge' | 'out'; detail: string }>,
-  trace: ['01 PREDICT', '02 RETRIEVE', '03 REASON', '04 REPORT'],
+    {
+      id: 'predict',
+      label: 'predict',
+      stream: 'structured',
+      detail: 'scikit-learn regression on the farm inputs',
+      writes: 'yield_prediction · yield_category',
+    },
+    {
+      id: 'retrieve',
+      label: 'retrieve',
+      stream: 'unstructured',
+      detail: 'ChromaDB, all-MiniLM-L6-v2 embeddings, top 4 passages',
+      writes: 'retrieved_docs',
+    },
+    {
+      id: 'reason',
+      label: 'reason',
+      stream: 'merge',
+      detail: 'LLM over the prediction and the passages together',
+      writes: 'llm_reasoning',
+    },
+    {
+      id: 'report',
+      label: 'report',
+      stream: 'out',
+      detail: 'JSON-mode report, normalised to a fixed schema',
+      writes: 'advisory_report',
+    },
+  ] as Array<{ id: string; label: string; stream: 'structured' | 'unstructured' | 'merge' | 'out'; detail: string; writes: string }>,
+  /** What each step does, as the token passes. Paraphrased from the node code. */
+  trace: [
+    { step: '01 PREDICT', line: 'model.predict(farm_data) → yield_prediction, yield_category' },
+    { step: '02 RETRIEVE', line: 'query("{crop} {soil} {weather} {yield_category} yield", n=4) → retrieved_docs' },
+    { step: '03 REASON', line: 'llm(prediction + retrieved_docs) → llm_reasoning' },
+    { step: '04 REPORT', line: 'json_mode → normalize_report() → advisory_report' },
+  ],
+  linkNote:
+    'The retrieval query includes the yield category the model just predicted, so the knowledge pulled in is about this farm’s situation, not the crop in general.',
+  resilience: [
+    'An error in any node is written to state; later nodes short-circuit instead of failing.',
+    'The report is forced into one schema, even when the model’s JSON is incomplete.',
+  ],
 }
 
 export type HttpMethod = 'GET' | 'POST' | 'PUT' | 'DELETE'
@@ -514,14 +550,15 @@ export const eduAI = {
     },
   ] as Array<{ base: string; routes: Array<[HttpMethod, string, boolean]> }>,
   /** POST /api/courses with useAI — courseController.createCourse + utils/ai.js. */
+  actors: ['Client', 'authMiddleware', 'courseController', 'Groq · Llama 3.3', 'Prisma → MongoDB'],
   sequence: [
-    { actor: 'Client', step: 'POST /api/courses { topic, useAI }', note: 'Bearer token from login' },
-    { actor: 'authMiddleware', step: 'jwt.verify → req.user.userId', note: '401 if missing or invalid' },
-    { actor: 'Groq', step: 'llama-3.3-70b-versatile, JSON mode', note: 'max_tokens 8000, temperature 0.5' },
-    { actor: 'ai.js', step: 'JSON.parse + modules check', note: 'falls back to a default course' },
-    { actor: 'Prisma', step: 'course.create → MongoDB', note: 'content stored as JSON' },
-    { actor: 'Prisma', step: 'quiz.create', note: 'chapter + final-assessment questions' },
-    { actor: 'Client', step: '201 Created', note: 'course with its quiz' },
+    { from: 0, to: 1, label: 'POST /api/courses { topic, useAI }', note: 'Bearer token from login' },
+    { from: 1, to: 2, label: 'jwt.verify → req.user.userId', note: '401 if missing or invalid' },
+    { from: 2, to: 3, label: 'generateCourseContent(topic)', note: 'JSON mode · max_tokens 8000 · temperature 0.5' },
+    { from: 3, to: 2, label: 'course JSON', note: 'parse + modules check; else a default course' },
+    { from: 2, to: 4, label: 'course.create', note: 'content stored as JSON' },
+    { from: 2, to: 4, label: 'quiz.create', note: 'chapter + final-assessment questions' },
+    { from: 2, to: 0, label: '201 Created', note: 'the course, its quiz ready' },
   ],
   security: [
     'Passwords hashed with bcrypt (10 salt rounds).',
@@ -660,16 +697,6 @@ export const processTabs: Array<{ id: string; label: string; steps: Partial<Reco
     },
   },
   {
-    id: 'agrimind',
-    label: 'AgriMind',
-    steps: {
-      Problem: 'Advice needs numbers and knowledge.',
-      Architecture: 'LangGraph state carries a yield prediction and retrieved passages into one reasoning step.',
-      Evaluation: 'Response consistency across structured and unstructured sources; relevance and reliability.',
-      Deployment: 'FastAPI on Render, React frontend.',
-    },
-  },
-  {
     id: 'eduai',
     label: 'EduAI',
     steps: {
@@ -677,6 +704,16 @@ export const processTabs: Array<{ id: string; label: string; steps: Partial<Reco
       Architecture: 'React SPA → Express REST API → Groq in JSON mode → Prisma on MongoDB.',
       Implementation: 'bcrypt + JWT auth, per-owner checks, a default-course fallback for malformed output.',
       Deployment: 'React on Vercel, Express on Render.',
+    },
+  },
+  {
+    id: 'agrimind',
+    label: 'AgriMind',
+    steps: {
+      Problem: 'Advice needs numbers and knowledge.',
+      Architecture: 'LangGraph state carries a yield prediction and retrieved passages into one reasoning step.',
+      Evaluation: 'Response consistency across structured and unstructured sources; relevance and reliability.',
+      Deployment: 'FastAPI on Render, React frontend.',
     },
   },
   {
