@@ -25,6 +25,7 @@
     "@types/node": "^20.14.10",
     "@types/react": "^19.0.0",
     "@types/react-dom": "^19.0.0",
-    "@types/three": "^0.167.2"
+    "@types/three": "^0.167.2",
+    "playwright": "^1.56.1"
   }
 }
