@@ -14,10 +14,7 @@ export const getLenis = () => instance
  * reduced motion keep native scrolling. Returns a teardown.
  */
 export function initSmoothScroll(): () => void {
-  if (prefersReducedMotion() || isCoarsePointer()) {
-    ScrollTrigger.refresh()
-    return () => {}
-  }
+  if (prefersReducedMotion() || isCoarsePointer()) return () => {}
 
   const lenis = new Lenis({
     duration: 1.1,
@@ -33,7 +30,6 @@ export function initSmoothScroll(): () => void {
 
   lenis.on('scroll', onScroll)
   gsap.ticker.add(raf)
-  ScrollTrigger.refresh()
 
   return () => {
     lenis.off('scroll', onScroll)

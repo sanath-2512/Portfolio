@@ -125,7 +125,7 @@ function CursorLayer() {
         <span className="absolute -left-[2px] -top-[2px] h-[5px] w-[5px] rounded-full bg-signal" />
         <span
           ref={label}
-          className="mono mono-sm absolute left-4 top-3 whitespace-nowrap bg-bg px-1.5 py-0.5 text-signal empty:hidden"
+          className="mono mono-sm absolute left-4 top-3 whitespace-nowrap bg-bg px-1.5 py-0.5 signal-sm empty:hidden"
         />
         <span ref={readout} className="cursor-readout mono absolute left-4 top-3 whitespace-nowrap text-[10px] tracking-[0.04em] text-measure" />
       </div>

@@ -38,7 +38,7 @@ export function ProjectApi() {
 
         <div className="grid12 mt-14 gap-y-12">
           {/* Endpoint sheet */}
-          <section className="col-span-4 md:col-span-12 lg:col-span-5" aria-label="API routes">
+          <section className="col-span-4 md:col-span-12 xl:col-span-5" aria-label="API routes">
             <p className="mono flex flex-wrap gap-x-3 text-ink-muted">
               <Metric source="eduaiRoutes">{endpoints} endpoints</Metric>
               <span>·</span>
@@ -66,7 +66,7 @@ export function ProjectApi() {
           </section>
 
           {/* Sequence diagram */}
-          <section className="col-span-4 md:col-span-12 lg:col-span-7" aria-labelledby="eduai-seq">
+          <section className="col-span-4 md:col-span-12 xl:col-span-7" aria-labelledby="eduai-seq">
             <p id="eduai-seq" className="mono text-ink-muted">
               <span className="text-ink">POST /api/courses</span> · useAI: true
             </p>
@@ -74,7 +74,7 @@ export function ProjectApi() {
             <div className="relative mt-5 hidden md:block">
               <div className="grid grid-cols-5 gap-2">
                 {e.actors.map((a) => (
-                  <p key={a} className="mono mono-sm border border-line-strong bg-bg px-2 py-2 text-center text-ink">
+                  <p key={a} className="mono border border-line-strong bg-bg px-1.5 py-2 text-center text-[10px] leading-tight text-ink [overflow-wrap:anywhere]">
                     {a}
                   </p>
                 ))}

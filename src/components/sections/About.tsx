@@ -44,7 +44,7 @@ function Sentence({ parts }: { parts: string | Segment[] }) {
 
 /**
  * §02 Reading me. Desktop: the block pins and the statement is read word by
- * word — each word scrubs from 25% to full ink, and key terms get a DETECT
+ * word — each word scrubs from half to full ink (half keeps 3:1 contrast), and key terms get a DETECT
  * box as they're read. Mobile: no pin; lines settle in and the boxes draw.
  */
 export default function About() {
@@ -66,7 +66,7 @@ export default function About() {
         return (index + 1) / words.length
       })
 
-      gsap.set(words, { opacity: 0.25 })
+      gsap.set(words, { opacity: 0.5 })
       const tl = gsap.timeline({
         scrollTrigger: {
           trigger: pinned.current,
@@ -85,7 +85,7 @@ export default function About() {
       gsap.utils.toArray<HTMLElement>('.about-sentence', scope).forEach((line) => {
         gsap.fromTo(
           line,
-          { opacity: 0.25 },
+          { opacity: 0.5 },
           { opacity: 1, ease: 'none', scrollTrigger: { trigger: line, start: 'top 85%', end: 'top 55%', scrub: true } },
         )
       })

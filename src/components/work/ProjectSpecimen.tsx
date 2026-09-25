@@ -27,7 +27,8 @@ function Regions({ board }: { board: Dashboard }) {
       trigger: el,
       start: 'top 60%',
       once: true,
-      onEnter: () => boxes.forEach((b, i) => timers.push(window.setTimeout(() => b.classList.add('is-on'), 900 + i * 220))),
+      onEnter: () =>
+        boxes.forEach((b, i) => timers.push(window.setTimeout(() => b.classList.add('is-on'), 900 + i * 220))),
     })
     return () => {
       st.kill()
@@ -37,7 +38,16 @@ function Regions({ board }: { board: Dashboard }) {
   return (
     <div ref={ref} className="pointer-events-none absolute inset-0" aria-hidden="true">
       {board.regions.map((r) => (
-        <div key={r.label} className="detect absolute block" style={{ left: `${r.x}%`, top: `${r.y}%`, width: `${r.w}%`, height: `${r.h}%` }}>
+        <div
+          key={r.label}
+          className="detect absolute block"
+          style={{
+            left: `${r.x}%`,
+            top: `${r.y}%`,
+            width: `${r.w}%`,
+            height: `${r.h}%`,
+          }}
+        >
           <span className="detect-box" style={{ inset: 0 }}>
             <i />
             <i />
@@ -55,46 +65,52 @@ function Regions({ board }: { board: Dashboard }) {
 
 function Spec({ board }: { board: Dashboard }) {
   return (
-    <dl className="grid gap-4">
-      <div className="border-t border-line pt-3">
-        <dt className="mono text-ink-muted">Tool · team</dt>
-        <dd className="mt-1">
-          {board.tool} · {board.team}
-        </dd>
-      </div>
-      <div className="border-t border-line pt-3">
-        <dt className="mono text-ink-muted">My part — {board.role}</dt>
-        <dd className="mt-1 leading-relaxed">{board.mine}</dd>
-      </div>
-      <div className="border-t border-line pt-3">
-        <dt className="mono text-ink-muted">Question</dt>
-        <dd className="mt-1 leading-relaxed">{board.question}</dd>
-      </div>
-      <div className="border-t border-line pt-3">
-        <dt className="mono text-ink-muted">Data</dt>
-        <dd className="mono mt-2 grid gap-1.5">
-          {board.scale.map((s, i) => (
-            <span key={s.label}>
-              {i === 0 ? <Metric source={board.source}>{s.value}</Metric> : <span className="text-measure">{s.value}</span>}{' '}
-              <span className="text-ink-muted">{s.label}</span>
-            </span>
-          ))}
-        </dd>
-      </div>
-      <div className="border-t border-line pt-3">
-        <dt className="mono text-ink-muted">Views</dt>
-        <dd className="mt-1">
-          <ol className="mono mono-sm grid gap-1">
-            {board.views.map((view, i) => (
-              <li key={view} className={cx(board.id === 'crop' && i === 3 ? 'text-ink' : 'text-ink-muted')}>
-                {String(i + 1).padStart(2, '0')} {view}
-                {board.id === 'crop' && i === 3 ? <span className="text-signal"> ← mine</span> : null}
-              </li>
+    <>
+      <dl className="grid gap-4">
+        <div className="border-t border-line pt-3">
+          <dt className="mono text-ink-muted">Tool · team</dt>
+          <dd className="mt-1">
+            {board.tool} · {board.team}
+          </dd>
+        </div>
+        <div className="border-t border-line pt-3">
+          <dt className="mono text-ink-muted">My part — {board.role}</dt>
+          <dd className="mt-1 leading-relaxed">{board.mine}</dd>
+        </div>
+        <div className="border-t border-line pt-3">
+          <dt className="mono text-ink-muted">Question</dt>
+          <dd className="mt-1 leading-relaxed">{board.question}</dd>
+        </div>
+        <div className="border-t border-line pt-3">
+          <dt className="mono text-ink-muted">Data</dt>
+          <dd className="mono mt-2 grid gap-1.5">
+            {board.scale.map((s, i) => (
+              <span key={s.label}>
+                {i === 0 ? (
+                  <Metric source={board.source}>{s.value}</Metric>
+                ) : (
+                  <span className="text-measure">{s.value}</span>
+                )}{' '}
+                <span className="text-ink-muted">{s.label}</span>
+              </span>
             ))}
-          </ol>
-        </dd>
-      </div>
-      <div className="flex flex-wrap gap-x-6 border-t border-line pt-2">
+          </dd>
+        </div>
+        <div className="border-t border-line pt-3">
+          <dt className="mono text-ink-muted">Views</dt>
+          <dd className="mt-1">
+            <ol className="mono mono-sm grid gap-1">
+              {board.views.map((view, i) => (
+                <li key={view} className={cx(board.id === 'crop' && i === 3 ? 'text-ink' : 'text-ink-muted')}>
+                  {String(i + 1).padStart(2, '0')} {view}
+                  {board.id === 'crop' && i === 3 ? <span className="signal-sm ml-1">← mine</span> : null}
+                </li>
+              ))}
+            </ol>
+          </dd>
+        </div>
+      </dl>
+      <div className="mt-4 flex flex-wrap gap-x-6 border-t border-line pt-2">
         {board.live ? (
           <a href={board.live} target="_blank" rel="noreferrer" className="link mono stretch-host">
             <StretchText reserve to={112}>
@@ -110,7 +126,7 @@ function Spec({ board }: { board: Dashboard }) {
           ↗
         </a>
       </div>
-    </dl>
+    </>
   )
 }
 
@@ -124,7 +140,13 @@ export function ProjectSpecimen() {
   return (
     <article id="dva" aria-labelledby="dva-title" className="relative mt-40 scroll-mt-16">
       <div className="shell">
-        <ProjectHead id="dva" no={d.no} name={d.name} oneLiner={d.oneLiner} meta={[d.domain, d.year, 'Team coursework']} />
+        <ProjectHead
+          id="dva"
+          no={d.no}
+          name={d.name}
+          oneLiner={d.oneLiner}
+          meta={[d.domain, d.year, 'Team coursework']}
+        />
         <p className="mono mt-6 text-ink-muted">{d.context}</p>
 
         {/* Specimen 1: large visual, narrow spec */}
@@ -178,7 +200,9 @@ export function ProjectSpecimen() {
                   sizes="(min-width: 1024px) 45vw, 94vw"
                   className="specimen h-auto w-full"
                 />
-                <figcaption className="mono mono-sm px-1 pt-2 text-ink-muted">Google Sheets · shown in monochrome</figcaption>
+                <figcaption className="mono mono-sm px-1 pt-2 text-ink-muted">
+                  Google Sheets · shown in monochrome
+                </figcaption>
               </figure>
             </ScanReveal>
           </div>

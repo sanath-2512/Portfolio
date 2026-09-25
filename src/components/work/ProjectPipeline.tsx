@@ -153,7 +153,7 @@ function Failover() {
               {p.name}
             </span>
             <span className="lane relative block h-px bg-line-strong" aria-hidden="true">
-              {i === 0 ? <span className="lane-fail mono mono-sm absolute -top-5 left-[58%] text-signal opacity-0">Timeout</span> : null}
+              {i === 0 ? <span className="lane-fail mono mono-sm absolute -top-5 left-[58%] signal-sm opacity-0">Timeout</span> : null}
               {i === 1 ? <span className="lane-ok mono mono-sm absolute -top-5 right-0 text-measure opacity-0">200 · streamed</span> : null}
             </span>
             <span className="mono mono-sm text-right text-ink-muted">{p.timeout} s</span>
@@ -284,7 +284,7 @@ export function ProjectPipeline() {
           {/* Mobile stepper rail */}
           <ol className="wa-rail sticky top-20 h-max self-start pt-14 lg:hidden" aria-hidden="true">
             {panels.map((p, i) => (
-              <li key={p.id} className="mono mono-sm py-1 text-ink-muted [&.is-active]:text-signal">
+              <li key={p.id} className="mono mono-sm py-1 text-ink-muted">
                 {String(i + 1).padStart(2, '0')}
               </li>
             ))}

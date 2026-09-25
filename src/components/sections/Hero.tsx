@@ -19,6 +19,8 @@ export default function Hero() {
   const title = useRef<HTMLHeadingElement | null>(null)
   const cell = useRef<HTMLSpanElement | null>(null)
   const fitWdth = useRef<number>(WDTH.max)
+  /** The pointer / velocity response waits until the entrance has settled. */
+  const introDone = useRef(false)
 
   /* ---- fit the name: solve for the wdth that fills the measure ---- */
   useLayoutEffect(() => {
@@ -60,12 +62,28 @@ export default function Hero() {
     return () => ro.disconnect()
   }, [])
 
-  /* ---- intro: lines rise from masks, all within 1.2 s ---- */
+  /* ---- intro: the name stretches in, the other lines rise from masks, all within 1.2 s ---- */
   useLayoutEffect(() => {
-    if (!root.current || prefersReducedMotion()) return
+    if (!root.current || prefersReducedMotion()) {
+      introDone.current = true
+      return
+    }
     const splits: SplitText[] = []
     const ctx = gsap.context(() => {
-      gsap.fromTo('.hero-name', { yPercent: 102 }, { yPercent: 0, duration: DUR.in, ease: EASE, stagger: 0.08 })
+      // The name is the LCP element, so it paints on the first frame and
+      // enters by STRETCH — condensed to its fitted width — rather than a mask.
+      gsap.fromTo(
+        title.current,
+        { '--wdth': WDTH.min },
+        {
+          '--wdth': () => fitWdth.current,
+          duration: DUR.long,
+          ease: EASE,
+          onComplete: () => {
+            introDone.current = true
+          },
+        },
+      )
       gsap.fromTo('.hero-rise', { yPercent: 102 }, { yPercent: 0, duration: 0.8, ease: EASE, delay: 0.04 })
       gsap.utils.toArray<HTMLElement>('.hero-split').forEach((el, i) => {
         splits.push(
@@ -105,7 +123,7 @@ export default function Hero() {
     let current = fitWdth.current
     let lastCell = ''
     const tick = (_t: number, deltaMs: number) => {
-      if (!inView) return
+      if (!inView || !introDone.current) return
       const dt = Math.min(deltaMs, 50) / 1000
       const base = fitWdth.current
       // Never wider than the fit, so the name can't overflow its measure.

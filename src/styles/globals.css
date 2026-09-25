@@ -648,11 +648,16 @@
 /* ================================================================== */
 
 @media (prefers-reduced-motion: reduce) {
+  /* 0s, not 0.01ms: with the default transition-property of "all", any
+     non-zero duration would make every style change a (tiny) transition, and
+     synchronous measurements would read the old value. */
   *,
   *::before,
   *::after {
-    transition-duration: 0.01ms !important;
+    transition-duration: 0s !important;
+    transition-delay: 0s !important;
     animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
   }
 }
 
@@ -746,12 +751,16 @@
 .ag-node.is-on > span.border-signal {
   background: var(--signal);
 }
-.ag-trace li {
-  opacity: 0.28;
-  transition: opacity 0.3s var(--ease-out);
+.ag-trace .ag-step,
+.ag-trace .ag-line {
+  color: var(--ink-muted);
+  transition: color 0.3s var(--ease-out);
 }
-.ag-trace li.is-on {
-  opacity: 1;
+.ag-trace li.is-on .ag-step {
+  color: var(--measure);
+}
+.ag-trace li.is-on .ag-line {
+  color: var(--ink);
 }
 
 /* Project screenshots sit in the palette: monochrome specimens. */
@@ -766,4 +775,21 @@
 .stack-row:hover .detect-box > i,
 .stack-row:focus-within .detect-box > i {
   transform: scale(1);
+}
+
+/* Small vermillion text. Paper's signal is ~3.9:1, so under 24px it becomes
+   ink with a signal rule — the accent stays, the text stays readable. */
+.signal-sm,
+.stack-row:hover .stack-tag,
+.wa-rail li.is-active {
+  color: var(--signal);
+}
+[data-theme='paper'] .signal-sm,
+[data-theme='paper'] .stack-row:hover .stack-tag,
+[data-theme='paper'] .wa-rail li.is-active {
+  color: var(--ink);
+  text-decoration: underline;
+  text-decoration-color: var(--signal);
+  text-decoration-thickness: 2px;
+  text-underline-offset: 3px;
 }

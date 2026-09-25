@@ -130,13 +130,13 @@ export default function HowIBuild() {
                 return (
                   <li
                     key={stage}
-                    className={cx('relative grid grid-cols-[22px_1fr] gap-3 lg:block lg:text-center', !text && 'opacity-35')}
+                    className="relative grid grid-cols-[22px_1fr] gap-3 lg:block lg:text-center"
                     aria-hidden={text ? undefined : true}
                   >
                     <span
                       className={cx(
                         'proc-node relative z-[1] block h-[15px] w-[15px] border lg:mx-auto',
-                        text ? 'border-ink bg-ink' : 'border-ink-muted bg-bg',
+                        text ? 'border-ink bg-ink' : 'border-dashed border-ink-muted bg-bg',
                       )}
                     />
                     <div className="lg:mt-4">

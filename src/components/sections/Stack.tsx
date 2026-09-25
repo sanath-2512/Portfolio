@@ -124,10 +124,7 @@ export default function Stack() {
                             {tool.projects.map((p) => (
                               <span
                                 key={p}
-                                className={cx(
-                                  'transition-colors duration-300 group-hover:text-signal',
-                                  filter === p ? 'text-signal' : 'text-ink-muted',
-                                )}
+                                className={cx('stack-tag transition-colors duration-300', filter === p ? 'signal-sm' : 'text-ink-muted')}
                               >
                                 {p}
                               </span>

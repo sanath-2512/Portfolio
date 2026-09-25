@@ -184,8 +184,8 @@ export function ProjectAgentGraph() {
             <ol className="ag-trace mono mono-sm mt-4 border border-line bg-bg p-4 normal-case tracking-normal">
               {a.trace.map((t) => (
                 <li key={t.step} className="py-1.5">
-                  <span className="text-measure">{t.step}</span>
-                  <span className="block text-ink-muted">{t.line}</span>
+                  <span className="ag-step">{t.step}</span>
+                  <span className="ag-line block">{t.line}</span>
                 </li>
               ))}
             </ol>

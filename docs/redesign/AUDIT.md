@@ -130,3 +130,16 @@ Sources read besides this repo (read-only clones):
 7. WorthyApply latency figure: resume note (16.07 → 5.89 s) vs repo benchmark (12.5 → 6.2 s, n = 30).
 8. Three first-person lessons for the case study (drafts will be marked).
 9. GSSoC contribution links.
+
+---
+
+## Addendum (after the checkpoint): five-project scope
+
+You asked for WorthyApply, EduAI, AgriMind, Viewly and the DVA portfolio. The three that aren't on the Sept 2026 résumé were read from their repos:
+
+| Project | Repo read | Findings |
+|---|---|---|
+| EduAI | `sanath-2512/EduAI.` @ `6fb838c` | React + Vite (Vercel). Express 5 + Prisma + MongoDB Atlas (Render). 4 models, 19 routes, 13 behind JWT. bcrypt (10 rounds), 7-day JWT, per-owner checks that return **401**. Groq `llama-3.3-70b-versatile` in JSON mode with a default-course fallback. **No role-based access control**: the old résumé and site claimed it. `sanath-2512/EduAI` (no dot) holds only a README. |
+| Viewly | `sanath-2512/Viewly` @ `913b468` | React 19 + Vite + React Router. TMDB trending, popular, top-rated, now-playing, search, details and videos. YouTube trailer embeds. Watchlist mirrored to localStorage. Netlify SPA redirect. Live URL not recorded (`TODO(user)`). **TMDB API key hardcoded in source.** |
+| DVA Portfolio | `sanath-2512/Dva-Portofolio` @ `5f2d5a5` + `r0hansng/SectionA_G17_IndiaAgriProductivity` + `sanath-2512/SecA-G10` | Both dashboards are 6-person team projects. **G-17:** you were PPT & Quality Lead and built Dashboard 4 (Crop Portfolio); the dataset has 345,336 rows covering 1997–2019, 707 districts and 37 states & UTs. **G10:** you did the pivot calculations; the dataset has 8,522 records. The DVA site **publicly shows a phone number and a home location**, and neither was copied here. |
+| AgriMind (detail) | `Agrim-2007/AgriMind` | The retrieval query includes the predicted `yield_category`, so retrieval is conditioned on the prediction. The report is JSON-mode, normalised to a fixed schema. An error in state short-circuits the later nodes. |

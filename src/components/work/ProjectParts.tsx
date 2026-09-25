@@ -25,10 +25,10 @@ export function ProjectHead({
       <p className="mono col-span-4 text-ink-muted md:col-span-12">
         <span className="text-ink">{no}</span> / {meta.join(' · ')}
       </p>
-      <h3 id={`${id}-title`} className="col-span-4 text-[clamp(2.75rem,7vw,6.5rem)] font-extrabold uppercase leading-[0.9] md:col-span-7" style={{ fontVariationSettings: "'wdth' 118" }}>
+      <h3 id={`${id}-title`} className="col-span-4 text-[clamp(2.75rem,6.4vw,6.25rem)] font-extrabold uppercase leading-[0.9] md:col-span-12 xl:col-span-7" style={{ fontVariationSettings: "'wdth' 118" }}>
         {name}
       </h3>
-      <p className="col-span-4 self-end text-[clamp(1.1rem,1.5vw,1.3rem)] leading-snug md:col-span-5">{oneLiner}</p>
+      <p className="col-span-4 self-end text-[clamp(1.1rem,1.5vw,1.3rem)] leading-snug md:col-span-8 xl:col-span-5">{oneLiner}</p>
     </header>
   )
 }

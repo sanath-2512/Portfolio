@@ -13,6 +13,7 @@ export function Citation({ k, variant = 'mark', className }: { k: SourceKey; var
   const [alignRight, setAlignRight] = useState(false)
   const id = useId()
   const root = useRef<HTMLSpanElement | null>(null)
+  const button = useRef<HTMLButtonElement | null>(null)
 
   useEffect(() => {
     if (!open) return
@@ -22,7 +23,10 @@ export function Citation({ k, variant = 'mark', className }: { k: SourceKey; var
       if (!root.current?.contains(e.target as Node)) setOpen(false)
     }
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') setOpen(false)
+      if (e.key !== 'Escape') return
+      // Closing removes the link; don't let focus fall back to <body>.
+      if (root.current?.contains(document.activeElement)) button.current?.focus()
+      setOpen(false)
     }
     document.addEventListener('pointerdown', onDown)
     document.addEventListener('keydown', onKey)
@@ -45,6 +49,7 @@ export function Citation({ k, variant = 'mark', className }: { k: SourceKey; var
       }}
     >
       <button
+        ref={button}
         type="button"
         className={variant === 'tag' ? 'mono mono-sm tap -my-3 inline-flex items-center text-measure' : 'cite'}
         aria-expanded={open}
