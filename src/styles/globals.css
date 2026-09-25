@@ -761,3 +761,9 @@
 [data-theme='darkroom'] .specimen {
   opacity: 0.9;
 }
+
+/* Stack rows: DETECT frames the row under the pointer or focus. */
+.stack-row:hover .detect-box > i,
+.stack-row:focus-within .detect-box > i {
+  transform: scale(1);
+}

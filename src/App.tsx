@@ -1,5 +1,4 @@
 import { lazy, Suspense, useEffect } from 'react'
-import { contact, signals, stack } from '@/data/content'
 import { initSmoothScroll } from '@/lib/smoothScroll'
 import { refreshOnLayoutSettled } from '@/lib/motion'
 import { startInput } from '@/lib/input'
@@ -17,10 +16,12 @@ import About from '@/components/sections/About'
 import Experience from '@/components/sections/Experience'
 import Work from '@/components/sections/Work'
 import HowIBuild from '@/components/sections/HowIBuild'
+import Stack from '@/components/sections/Stack'
+import Signals from '@/components/sections/Signals'
+import Contact from '@/components/sections/Contact'
 
 const CaseStudy = lazy(() => import('@/components/case/CaseStudy'))
 const CASE_PATH = '/work/worthyapply'
-import { Pending } from '@/components/sections/Pending'
 
 export default function App() {
   const path = usePath()
@@ -80,13 +81,9 @@ export default function App() {
             <Experience />
             <Work />
             <HowIBuild />
-            <Pending id="stack" title="Stack">
-              {stack.map((g) => g.label).join(' · ')}
-            </Pending>
-            <Pending id="signals" title="Signals">
-              {signals.map((s) => s.what).join(' · ')}
-            </Pending>
-            <Pending id="contact" title={contact.headline} />
+            <Stack />
+            <Signals />
+            <Contact />
           </>
         )}
       </main>
