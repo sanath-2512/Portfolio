@@ -1,6 +1,6 @@
 # Sanath Waraikar — portfolio
 
-"Calibrated": a portfolio that behaves like a measuring instrument. Vite · React 19 · TypeScript · Tailwind v4 · GSAP (ScrollTrigger, SplitText) · Lenis · three.js.
+"Calibrated": a portfolio that behaves like a measuring instrument. Vite · React 19 · TypeScript · Tailwind v4 · GSAP (ScrollTrigger, SplitText) · three.js.
 
 ```bash
 npm install
