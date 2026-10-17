@@ -291,6 +291,13 @@ export const experience = {
   },
 }
 
+/** Current role, as told by Sanath, Oct 2026. No details yet beyond the title. */
+export const currentRole = {
+  org: 'WorldQuant BRAIN',
+  role: 'Consultant',
+  period: 'Oct 2026 – Present',
+}
+
 export const education = {
   degree: 'B.Tech (Artificial Intelligence)',
   school: 'Newton School of Technology, Rishihood University',

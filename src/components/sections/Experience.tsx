@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { education, experience } from '@/data/content'
+import { currentRole, education, experience } from '@/data/content'
 import { cx } from '@/lib/utils'
 import { SectionFrame } from '@/components/global/SectionFrame'
 import { DimensionLine } from '@/components/motion/DimensionLine'
@@ -23,7 +23,17 @@ export default function Experience() {
           Where I learned to <span style={{ fontVariationSettings: "'wdth' 125" }}>ship</span>
         </StretchHeading>
 
-        <div className="grid12 mt-14 gap-y-8">
+        <div className="mt-14 grid12 gap-y-2 border-y border-line py-5">
+          <p className="mono col-span-4 md:col-span-2">
+            <span className="signal-sm">● Now</span>
+          </p>
+          <p className="col-span-4 text-[clamp(1.15rem,1.8vw,1.5rem)] font-semibold md:col-span-4">{currentRole.org}</p>
+          <p className="col-span-4 text-ink-muted md:col-span-3">{currentRole.role}</p>
+          <p className="mono col-span-4 md:col-span-3 md:text-right">{currentRole.period}</p>
+        </div>
+
+        <p className="mono mt-12 text-ink-muted">Previously</p>
+        <div className="grid12 mt-6 gap-y-8">
           <div className="col-span-4 md:col-span-5">
             <p className="text-[clamp(2rem,4.4vw,3.75rem)] font-extrabold uppercase leading-[0.9]" style={{ fontVariationSettings: "'wdth' 118" }}>
               {experience.org}

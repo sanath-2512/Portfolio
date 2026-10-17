@@ -65,6 +65,9 @@ The code that holds this text is `src/data/content.ts`. A few short labels live 
 ## 03 Experience
 
 - Heading → Where I learned to ship
+- Now → WorldQuant BRAIN · Consultant · Oct 2026 – Present
+  - Add a line about what you work on there if you want it shown.
+- Previously →
 - Company → Fusion Cards
 - Role → AI Software Engineer Intern · Jun — Aug 2026 · Remote
 - Intro 1 → I worked on enterprise document intelligence where the interesting problems weren't "how do I call an LLM?"
