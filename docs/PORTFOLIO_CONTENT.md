@@ -152,7 +152,7 @@ The code that holds this text is `src/data/content.ts`. A few short labels live 
 - Tech → React · TMDB API · Local storage · Routing · Netlify
 - Routes rail → / Home · /search · /movie/:id · /movie/:id/:key · /watchlist · /about
 - **Deep dive** → what each screen loads · persistence · deployment
-- Live URL → **[FILL IN]**
+- Live URL → https://viewlyy.netlify.app/
 
 ### 05 DVA — Data, before the AI
 

@@ -724,7 +724,7 @@ export const viewly = {
   stack: ['React', 'Vite', 'React Router', 'TMDB API', 'YouTube embeds', 'localStorage', 'Netlify'],
   links: {
     github: 'https://github.com/sanath-2512/Viewly',
-    demo: todo('Viewly Netlify URL'),
+    demo: 'https://viewlyy.netlify.app/',
   } as ProjectLinks,
   /** src/App.jsx routes and the TMDB endpoints each view calls. */
   routes: [
