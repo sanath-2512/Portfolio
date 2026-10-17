@@ -161,7 +161,7 @@ The code that holds this text is `src/data/content.ts`. A few short labels live 
 - What I learned → The project was a reminder that good systems start with understanding the data.
 - Crop dashboard → 23 years of crop data · 1997–2019 (with labelled regions)
 - **Deep dive** → datasets, team roles, my part, the dashboard views · the course site
-- Course site live URL → **[FILL IN]**
+- Course site live URL → https://dva-portofolio.vercel.app/
 
 ---
 

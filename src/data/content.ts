@@ -755,7 +755,7 @@ export const dva = {
   site: {
     stack: ['React', 'Vite', 'Tailwind CSS', 'Framer Motion'],
     github: 'https://github.com/sanath-2512/Dva-Portofolio',
-    demo: todo('DVA portfolio live URL') as Maybe<string>,
+    demo: 'https://dva-portofolio.vercel.app/' as Maybe<string>,
   },
   dashboards: [
     {
